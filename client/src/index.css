@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html{
+    scroll-behavior: smooth;
+}
+
+body{
+    background-color: #fffefe;
+    width: 100vw;
+    overflow-x: hidden;
+    font-family: 'Montserrat', 'Muli', sans-serif;
+}
+
+.animate-slide-in{
+    animation: slide-in 0.3s ease-in;
+}
+
+.animate-slide-out{
+    animation: slide-out 0.3s ease-in;
+} 
+
+.border-dot-bottom{
+    border-bottom: 2px dashed #e8eaed;
+}
+
+.border-dot-top{
+    border-top: 2px dashed #e8eaed;
+}
+
+.border-dot-left{
+    border-left: 2px dashed #e8eaed;
+}
+
+.border-dot-right{
+    border-right: 2px dashed #e8eaed;
+}
+
+@keyframes slide-in{
+    0%{
+        transform: translateX(100%);
+    }
+    100%{
+        transform: translateX(0%);
+    }
+}
+
+@keyframes slide-out{
+    100%{
+        transform: translateX(100%);
+    }
+    0%{
+        transform: translateX(0%);
+    }
+}
