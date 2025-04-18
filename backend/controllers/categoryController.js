@@ -1,5 +1,4 @@
 import Category from "../models/categoryModel.js"
-import Post from "../models/postModel.js"
 
 export const allCategory = async(req, res)=>{
     const category = await Category.find()

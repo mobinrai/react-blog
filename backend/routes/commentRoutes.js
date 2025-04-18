@@ -1,18 +1,15 @@
 import express from "express"
+import { allCommentsByParams, createComment } from "../controllers/commentsController.js"
 
 const router = express.Router()
 
-router.get("/anotherTest", (req,res)=>{
-    res.status(200).send("it works with another text")
-})
+router.get("/", allCommentsByParams)
 
 router.get("/:id", (req,res)=>{
     res.status(200).send("single comment id")
 })
 
-router.post("/", (req,res)=>{
-    res.status(200).send("new comment created")
-})
+router.post("/", createComment)
 
 router.patch("/:id", (req,res)=>{
     res.status(200).send("update single comment")

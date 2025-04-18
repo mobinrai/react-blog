@@ -15,9 +15,9 @@ export const useFetchAllPost = ()=>{
     })
 }
 
-export const useFetchPostBySlug = (slug)=>{
+export const useFetchPostBySlug = (slug, queryKey)=>{
     return useQuery({
-        queryKey: ['post', slug],
+        queryKey: queryKey,
         queryFn: async () => {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/posts/${slug}`);
             return res.data;

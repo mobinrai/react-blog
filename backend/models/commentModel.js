@@ -3,13 +3,11 @@ import mongoose, { Schema } from "mongoose";
 const commentSchema = new mongoose.Schema({
     fullName:{
         type:String,
-        required:true,
-        unique:true
+        required:true
     },
     email:{
         type:String,
-        required:true,
-        unique:true
+        required:true
     },
     website:{
         type:String

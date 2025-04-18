@@ -11,16 +11,33 @@ import StyledButton from '../components/StyledButton'
 import FollowUs from '../components/FollowUs'
 import NewsLetterForm from '../components/NewsLetterForm'
 import { useFetchPostBySlug } from '../../queries/PostQuery'
+import Comments from '../components/Comments'
+import { formatCreatedDate } from '../../utils/dates'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 
 const SingleBlog = () => {
     const {slug} = useParams()
-
+    const queryKey = ['post', slug]
+    const queryClient = useQueryClient()
     const { 
         isPending, 
         isError, 
         data:post, 
         error 
-    } = useFetchPostBySlug(slug)
+    } = useFetchPostBySlug(slug, queryKey)
+
+    const mutation = useMutation({
+        mutationFn: async (newComment) => {
+            return axios.post(`${import.meta.env.VITE_API_URL}/comments`, newComment)
+        },
+        onSuccess:()=>{
+           queryClient.invalidateQueries(queryKey) 
+        },
+        onError:(err)=>{
+            console.log(err);
+        }
+    })
 
     const {pathname} = useLocation()
 
@@ -38,18 +55,20 @@ const SingleBlog = () => {
         }))
     }, []);
 
-    let createdDate =''
-    let createdMonthAndYear =''
-
-    if(post){
-        const date= new Date(post.createdAt)
-        createdDate =date.getDate()
-        createdMonthAndYear = date.toLocaleString('en-US',{
-            month:'long',
-            year:'numeric'
-        })
+    const handleSubmit = (e,postId)=>{
+        e.preventDefault();
+        const formData = new FormData(e.target)
+        const data = {
+            fullName:formData.get('fullName'),
+            email:formData.get('email'),
+            post:postId,
+            website:formData.get('website'),
+            message:formData.get('message'),
+        }
+        mutation.mutate(data)
     }
-    
+
+        
     if (isPending) return <p>Loading...</p>;
     if (error) return <p>Error loading post.</p>;   
 
@@ -61,8 +80,7 @@ const SingleBlog = () => {
                         <div className="flex flex-col w-full gap-4">
                             <h3 className='font-bold text-2xl'>{post?.title}</h3>
                             <PostMetaData 
-                            createdAt={`${createdDate}, 
-                            ${createdMonthAndYear}`}
+                            createdAt={formatCreatedDate(post?.createdAt)}
                             authorName={post?.user.username}
                             categoryName={post?.category?.name}
                             authorLink={post?.user.username}
@@ -151,70 +169,22 @@ const SingleBlog = () => {
                                 </div>
                             </div>
                             <div id='comments' className="comments-section my-6 scroll-mt-4">
-                                <SectionTitleWithLine title={'Comments (4)'}/>
+                                <SectionTitleWithLine title={'Comments'}/>
                                 <ul className="mt-4 flex flex-col gap-4">
-                                    <li className='flex gap-4'>
-                                        <div>
-                                        <img src="../images/users/avatar-1.jpg.webp" className='rounded-[50%]' alt="" srcset=""/>
-                                        </div>
-                                        <div className="meta-post">
-                                            <p className='text-black font-bold'>Author Name <span className='text-gray-500 font-light pl-3'>2 days ago</span></p>
-                                            <p className="comments  mt-4">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias tempora tenetur voluptate?
-                                            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias tempora tenetur voluptate?
-                                            </p>
-                                            <button className='bg-[#323335] text-white py-1.5 px-3 mt-4'>Reply</button>
-                                            <ul className="comments-reply mt-4">
-                                                <li className='flex gap-4 mb-4'>
-                                                    <div>
-                                                        <img src="../images/users/avatar-1.jpg.webp" alt="" className='rounded-[50%]' srcset=""/>
-                                                    </div>
-                                                    <div className="meta-post">
-                                                        <p className='text-black font-bold'>Author Name <span className='text-gray-500 font-light pl-3'>2 days ago</span></p>
-                                                        <p className="comments  mt-4">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias tempora tenetur voluptate?
-                                                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias tempora tenetur voluptate?
-                                                        </p>
-                                                        <button className='bg-[#323335] text-white py-1.5 px-3 mt-4'>Reply</button>
-                                                    </div>
-                                                </li>
-                                                <li className='flex gap-4 mb-4'>
-                                                    <div>
-                                                        <img src="../images/users/avatar-1.jpg.webp" className='rounded-[50%]' alt="" srcset=""/>
-                                                    </div>
-                                                    <div className="meta-post">
-                                                        <p className='text-black font-bold'>Author Name <span className='text-gray-500 font-light pl-3'>2 days ago</span></p>
-                                                        <p className="comments  mt-4">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias tempora tenetur voluptate?
-                                                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias tempora tenetur voluptate?
-                                                        </p>
-                                                        <button className='bg-[#323335] text-white py-1.5 px-3 mt-4'>Reply</button>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>                                    
-                                    </li>
-                                    <li className='flex gap-4'>
-                                        <div>
-                                            <img src="../images/users/avatar-1.jpg.webp" alt="" title='check author page' srcset="" className='rounded-[50%]'/>
-                                        </div>
-                                        <div className="meta-post">
-                                            <p className='text-black font-bold'>Author Name<span className='text-gray-500 font-light pl-3'>2 days ago</span></p>
-                                            <p className="comments  mt-4">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias tempora tenetur voluptate?
-                                            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias tempora tenetur voluptate?
-                                            </p>
-                                            <button className='bg-[#323335] text-white py-1.5 px-3 mt-4'>Reply</button>
-                                        </div>
-                                    </li>
+                                    <Comments postId={post?._id}/>
                                 </ul>
                                 <div className='my-6'>
                                     <SectionTitleWithLine title={'Leave a Reply'}/>
-                                    <p className='text-gray-400'>Your email will not be published</p>
-                                    <form action="" className='flex flex-col gap-4 mt-6'>
+                                    <p className='text-gray-400 mt-4'>Your email will not be published</p>
+                                    <p className='my-2 text-red-600 text-sm'>Note: Field with * is mandatory</p>
+                                    <form onSubmit={(event)=>handleSubmit(event, post?._id)} className='flex flex-col gap-4 mt-6'>
                                         <div className="flex gap-4">
-                                        <TextField required id="email" label="Required" defaultValue="Email" fullWidth/>
-                                        <TextField required id="fullName" label="Required" defaultValue="Full Name" fullWidth/>
+                                        <TextField required id="fullName" name='fullName' label="Full Name"  fullWidth/>
+                                        <TextField required id="email" name='email' label="Email" fullWidth/>
                                         </div>
-                                        <TextField required id="website" label="Website" defaultValue="" aria-label='website' fullWidth/>
-                                        <TextField multiline minRows={5} label="Required *"/>
-                                        <StyledButton width="30%" icon={<InsertComment/>}>Post comment</StyledButton>
+                                        <TextField id="website" name='website' label="Website" defaultValue="" aria-label='website' fullWidth/>
+                                        <TextField multiline name='message' minRows={5} label="Required *" required/>
+                                        <StyledButton width="30%" icon={<InsertComment/>} type="submit">Post comment</StyledButton>
                                     </form>
                                 </div>
                             </div>
