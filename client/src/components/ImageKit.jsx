@@ -1,7 +1,7 @@
 import { IKImage } from 'imagekitio-react'
 import React from 'react'
 
-const ImageKit = ({path, className, alt, w, h}) => {
+const ImageKit = ({path='default-image.jpg', className='', alt='', w, h}) => {
   return (
     <IKImage urlEndpoint={import.meta.env.VITE_IK_URL_ENDPOINT}
     path={path}

@@ -10,6 +10,7 @@ import Contact from './src/pages/Contact'
 import About from './src/pages/About'
 import Author from './src/pages/Author'
 import CreateBlog from './src/pages/CreateBlog'
+import SingleCategory from './src/pages/SingleCategory'
 
 const route = createBrowserRouter([
     {
@@ -24,8 +25,12 @@ const route = createBrowserRouter([
                 element:<Blogs/>
             },
             {
-                path:"/:slug",
+                path:"/blog/:slug",
                 element:<SingleBlog/>
+            },
+            {
+                path:"/cat/:slug",
+                element:<SingleCategory/>
             },
             {
                 path:"/contact",

@@ -1,12 +1,12 @@
 import mongoose, { Schema } from "mongoose";
 
 const postSchema = new mongoose.Schema({
-    userId:{
+    user:{
         type:Schema.Types.ObjectId,
         ref:"User",
         required:true
     },
-    categoryId:{
+    category:{
         type:Schema.Types.ObjectId,
         ref:"Category",
         required:true
