@@ -1,13 +1,11 @@
 import express from "express"
-import { allCommentsByParams, createComment } from "../controllers/commentsController.js"
+import { allCommentsByParams, createComment, getAllChildComments } from "../controllers/commentsController.js"
 
 const router = express.Router()
 
 router.get("/", allCommentsByParams)
 
-router.get("/:id", (req,res)=>{
-    res.status(200).send("single comment id")
-})
+router.get("/withChildren", getAllChildComments)
 
 router.post("/", createComment)
 

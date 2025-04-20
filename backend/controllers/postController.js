@@ -23,10 +23,46 @@ export const getPosts = async (req, res) => {
 
 export const getPost = async (req, res) => {
 
-  const post = await Post.findOne({ slug: req.params.slug })
-    .populate({ path: 'user', select: 'username' })
-    .populate('category', 'name slug')
-  
+    const post = await Post.aggregate([
+        { $match: { slug: req.params.slug } },
+        {
+          $lookup: {
+            from: 'comments',
+            localField: '_id',
+            foreignField: 'post',
+            as: 'comments'
+          }
+        },
+        {
+          $addFields: {
+            totalComments: { $size: '$comments' } 
+          }
+        },
+        {
+          $project: {
+            comments: 0
+          }
+        },
+        {
+            $lookup: {
+              from: 'users',
+              localField: 'user',
+              foreignField: '_id',
+              as: 'user'
+            }
+        },
+        { $unwind: '$user' }, 
+        {
+            $lookup: {
+              from: 'categories',
+              localField: 'category',
+              foreignField: '_id',
+              as: 'category'
+            }
+        },
+        { $unwind: '$category' }
+        
+      ])
     res.status(200).json(post)
 }
 
@@ -40,8 +76,8 @@ export const createPost = async (req, res) => {
         if (!user) {
             return res.status(400).json('User not found.')
         }
-
-    let slug = req.body.title.replace(/ /g, '-').toLowerCase()
+    let cleanSlug = req.body.title.replace(/[?=\/'*()&^%$#@!:]/g, '')
+    let slug = cleanSlug.replace(/ /g, '-').toLowerCase()
     let slugExist = await Post.findOne({ slug })
     let counter = 2
     while (slugExist) {

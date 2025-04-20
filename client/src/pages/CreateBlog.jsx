@@ -8,7 +8,7 @@ import 'react-quill-new/dist/quill.snow.css';
 import { useFetchAllCategory } from '../../queries/CategoryQuery';
 import { useCreatePost } from '../../queries/PostQuery';
 import ImageKitUpload from '../components/ImageKitUpload';
-// import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DisplayMessage from '../components/DisplayMessage';
 
 const CreateBlog = () => {
     const {isLoaded, isSignedIn} = useUser()
@@ -29,11 +29,15 @@ const CreateBlog = () => {
     }, [video])
 
     if(isError){
-        return <span>{error.message}</span>
+        return <DisplayMessage message={error.message} />
     }
 
     if(isLoaded && !isSignedIn){
-        return <span>Please sign in....</span>
+        return <DisplayMessage message='Please sign in....' />
+    }
+
+    if(!isLoaded || isPending){
+        return <DisplayMessage message={'Is Loading...'}/>
     }
 
     const handleSubmit = (e)=>{
@@ -56,7 +60,6 @@ const CreateBlog = () => {
     return (
         <section className="create-blog-post">
             <div className="max-w-6xl mx-auto px-2.5 my-8">
-                {!isLoaded || isPending && <span>Loadgin....</span> }
                 <div className="flex flex-col">
                 <h3 className='mt-6 text-2xl font-bold'>Create Blog</h3>
                 <hr />

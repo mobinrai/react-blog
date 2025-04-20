@@ -7,10 +7,6 @@ export const allCategory = async(req, res)=>{
 
 export const getCategory = async(req,res)=>{
     const category = await Category.findOne({slug: req.params.slug})
-    // if(!category){
-    //     throw new Error('Could not find category')
-    // }
-    // const posts = await Post.find({ category: category._id })
     res.status(200).json(category)
 }
 

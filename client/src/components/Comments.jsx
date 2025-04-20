@@ -1,51 +1,54 @@
+import React from 'react'
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import React from 'react'
 import { formatCreatedDate } from '../../utils/dates';
+import ChildComment from './ChildComment';
+import DisplayMessage from './DisplayMessage';
+import ImageKit from './ImageKit';
+import CommentDetails from './CommentDetails';
 
-const Comments = ({postId}) => {
+const Comments = ({postId, onClick}) => {
+    
     const {isPending, isError, data:comments, error} = useQuery({
         queryKey: ['comments', postId],
         queryFn: async () => {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/comments/`,{
-                params:{post:postId}
-            });
-            return res.data;
+            try{
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/comments/withChildren`,{
+                    params:{postId}
+                });
+                return res.data;
+            }catch(error){
+                console.log(error);
+            }
         }
     });
     if(isPending){
-        return <span>Comments are loading...</span>
+        return <DisplayMessage message='Comments are loading...' />
     }
 
     if(isError){
-        return <span>Error : {error.message}.</span>
+        return <DisplayMessage message={`Error : ${error.message}.`}/>
     }
 
     if(comments.length<1){
-        return <span className='my-4'>No comments found. Be the first to make a comment.</span>
+        return <span className='pt-8'>No comments found. Be the first to make a comment.</span>
     }
+    console.log(comments);
     return (
-        <>
+        <ul className='flex flex-col gap-4 my-6'>
         {
-          comments && comments.map((comment)=>{
-            
-            return <li key={comment._id} className='flex gap-4'>
-            <div>
-                <img src="../images/users/avatar-1.jpg.webp" className='rounded-[50%] w-12' alt="" srcset=""/>
-            </div>
-            <div className="meta-post">
-                <p className='text-black font-bold'>{comment.fullName}<span className='text-gray-500 font-light pl-3'>
-                    {formatCreatedDate(comment.createdAt)}</span></p>
-                <p className="comments  mt-4">
-                    {comment.message}
-                </p>
-                <button className='bg-[#323335] text-white py-1.5 px-3 mt-4'>Reply</button>
-                
-            </div>
-        </li>
-          })   
+            comments && comments.map((comment)=>{
+                return <li key={comment._id} className='flex flex-col gap-4 border-b pb-4'>
+                            <CommentDetails comment={comment} onClick={onClick}/>
+                            {
+                                comment.children && comment.children.map(child=>{
+                                    return <ChildComment key={child._id} data={child} onReplyClick={onClick}/>
+                                })
+                            }
+                </li>
+            })   
         }
-        </>  
+        </ul> 
   )
 }
 

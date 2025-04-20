@@ -7,7 +7,10 @@ const StyledButton = (props)=> {
         backgroundColor: 'transparent',
         boxShadow:'none',
         color: '#ee4266',
-    }}} disabled={props.disabled ?? false} endIcon={props.icon} type={props.type??''}>
+    }}} disabled={props.disabled ?? false} endIcon={props.icon} type={props.type??''}
+    onClick={props.onClick ?? (() => {})}
+    className={props.className ?? ''}
+    >
         {props.children}
     </Button>
   )

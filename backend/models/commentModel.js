@@ -12,6 +12,11 @@ const commentSchema = new mongoose.Schema({
     website:{
         type:String
     },
+    userId:{
+        type:Schema.Types.ObjectId,
+        ref:"User",
+        default:null
+    },
     parentId:{
         type:Schema.Types.ObjectId,
         ref:"Comment",
@@ -24,8 +29,7 @@ const commentSchema = new mongoose.Schema({
     },
     message:{
         type:String,
-        required:true,
-        unique:true
+        required:true
     }
 },{timestamps:true});
 

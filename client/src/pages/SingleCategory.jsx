@@ -8,6 +8,7 @@ import PostImage from '../components/PostImage'
 import PostMetaData from '../components/PostMetaData'
 import StyledButton from '../components/StyledButton'
 import axios from 'axios'
+import DisplayMessage from '../components/DisplayMessage'
 
 const SingleCategory = () => {
     const {slug} = useParams()
@@ -15,11 +16,11 @@ const SingleCategory = () => {
     const {isPending, isError, data, error} = useFetchCategoryBySlug(slug)   
     
     if(isPending){
-        return <span>Is Loading...</span>
+        return <DisplayMessage message='Loading...'/>
     }
 
     if (isError) {
-        return <span>Error: {error.message}</span>;
+        return <DisplayMessage message={`Error: ${error.message}`}/>
     }
 
     const fetchCategoryPosts = async (pageParam) => {
@@ -55,8 +56,8 @@ const SingleCategory = () => {
                                             createdAt={`${day}, ${month}`} 
                                             categoryLink={item.category.slug} 
                                             categoryName={item.category.name} 
-                                            authorName={item.user.username}
-                                            authorLink={item.user.username}
+                                            authorName={item.user?.username}
+                                            authorLink={item.user?.username}
                                             />
                                             <p>{item.desc}</p>
                                             <StyledButton><a href={`/blog/${item.slug}`}>Read More</a></StyledButton>
