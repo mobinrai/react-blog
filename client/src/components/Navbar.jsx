@@ -2,7 +2,7 @@ import { SignedIn, SignedOut, useAuth, UserButton, useUser } from '@clerk/clerk-
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import MainCategories from './MainCategories'
-import {Menu, Close} from '@mui/icons-material'
+import {Menu, Close, AccountCircle} from '@mui/icons-material'
 
 export const Navbar = () => {
     const [openMenu, setOpenMenu] = useState(false)
@@ -77,13 +77,17 @@ export const Navbar = () => {
                         </nav>
                         <SignedOut>
                             <Link to='/login' className=''>
-                            <button className='rounded-3xl bg-gray-400 text-white py-2 px-4 font-bold'>
-                                Login
-                            </button>
+                                <button className='rounded-3xl bg-gray-400 text-white py-2 px-4 font-bold'>
+                                    Login
+                                </button>
                             </Link>
                         </SignedOut>
                         <SignedIn>
-                            <UserButton />
+                            <UserButton>
+                                <UserButton.MenuItems>
+                                    <UserButton.Link label='User Dashboard' labelIcon={<AccountCircle/>}href='/user/dashboard'/>
+                                </UserButton.MenuItems>
+                            </UserButton>
                         </SignedIn>
                         </div>
                     </div>
@@ -100,7 +104,24 @@ export const Navbar = () => {
                     <>
                         <nav className="flex justify-end gap-4 fixed w-full z-40 top-0 right-0 bottom-0 bg-opacity-80 bg-black text-white animate-slide-in" id='mobile-menu' aria-label='main'>
                         <Close className='fixed right-6 top-5' onClick={()=>setOpenMenu(prev=>!prev)}/>
+                            
                             <ul className='pl-6 flex flex-col w-1/2  bg-black justify-center gap-4'>
+                                <li className="border-b p-1">
+                                    <SignedOut>
+                                        <Link to='/login' className=''>
+                                        <button className='rounded-3xl bg-gray-400 text-white py-2 px-4 font-bold'>
+                                            Login
+                                        </button>
+                                        </Link>
+                                    </SignedOut>
+                                    <SignedIn>
+                                        <UserButton>
+                                            <UserButton.MenuItems>
+                                                <UserButton.Link label='My Dashboard' labelIcon={<AccountCircle/>}href='/user/dashboard'/>
+                                            </UserButton.MenuItems>
+                                        </UserButton>
+                                    </SignedIn>
+                                </li>
                                 <li className='border-b p-1'>
                                     <Link
                                     to='/'

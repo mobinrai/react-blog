@@ -9,6 +9,7 @@ import PostMetaData from '../components/PostMetaData'
 import StyledButton from '../components/StyledButton'
 import axios from 'axios'
 import DisplayMessage from '../components/DisplayMessage'
+import { ReadMore } from '@mui/icons-material'
 
 const SingleCategory = () => {
     const {slug} = useParams()
@@ -60,7 +61,7 @@ const SingleCategory = () => {
                                             authorLink={item.user?.username}
                                             />
                                             <p>{item.desc}</p>
-                                            <StyledButton><a href={`/blog/${item.slug}`}>Read More</a></StyledButton>
+                                            <StyledButton><a href={`/blog/${item.slug}`} className='w-full' title='Read more'>Read More <ReadMore/></a></StyledButton>
                                         </div>
                                     </div> 
                             })

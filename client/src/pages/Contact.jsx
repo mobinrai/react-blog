@@ -8,6 +8,7 @@ import StyledButton from '../components/StyledButton';
 import PageMainTitle from '../components/PageMainTitle';
 import NewsLetterForm from '../components/NewsLetterForm';
 import FollowUs from '../components/FollowUs';
+import RightAside from '../components/RightAside';
 
 const Contact = () => {
   return (
@@ -15,7 +16,7 @@ const Contact = () => {
         <PageMainTitle title={'Contact Us'}/>
         <div className="max-w-6xl mx-auto px-2.5 flex flex-col md:flex-row max-md:gap-10 gap-4 my-8">
             <div className='w-full md:w-2/3'>
-                <div className="contact-info-sectio my-6">
+                <div className="contact-info-sectio my-4">
                     <SectionTitleWithLine divClassName={'mb-4'} title={'Contact Information'}/>
                     <address className='not-italic flex flex-col gap-6'>
                         <p><span className="rounded-full border p-2 my-2 mr-6"><Phone sx={{ color: red[500] }} fontSize='small'/></span><a href="tel:+012025550194">202-555-0194</a></p>
@@ -33,15 +34,7 @@ const Contact = () => {
                     </form>
                 </div>
             </div>
-            <div className='w-full md:w-1/3 flex flex-col gap-4 mt-5'>
-                <FollowUs/>
-                {/* filter */}
-                {/* search */}
-                <SectionTitleWithLine divClassName={'mb-4'} title={'Social Media'}/>
-                <SiteSocialWidget/>
-                <SectionTitleWithLine title={'NewsLetter'}/>
-                <NewsLetterForm/>
-            </div>
+            <RightAside/>
         </div>
     </section>    
   )

@@ -1,7 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component'
-import IsLoading from './DisplayMessage'
 import DisplayMessage from './DisplayMessage'
 
 const MyInfiniteScroll = ({fetchPosts,queryKey,setData,items, children}) => {
@@ -43,7 +42,7 @@ const MyInfiniteScroll = ({fetchPosts,queryKey,setData,items, children}) => {
                 }
             }
             loader={<DisplayMessage message='Loading...'/>}
-            endMessage={<DisplayMessage message={`${items.length>0 ?'All data has been loaded...': 'No post found'}`}/>}
+            endMessage={<DisplayMessage message={`${items.length>0 ?'All data has been loaded...': 'Post not found.'}`}/>}
             >
                 {children}
         </InfiniteScroll>

@@ -12,7 +12,7 @@ export const getPosts = async (req, res) => {
     const { page = parseInt(req.query.page) || 1, limit = parseInt(req.query.limit)|| 3, ...filters } = req.query;
     const skip = (page-1) * limit
     const posts = await Post.find(filters)
-    .populate({ path: 'user', select: '_id username' })
+    .populate({ path: 'user', select: '_id username fullName img email' })
     .populate('category', 'name slug')
     .limit(limit)
     .skip(skip)

@@ -1,10 +1,8 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { formatCreatedDate } from '../../utils/dates';
 import ChildComment from './ChildComment';
 import DisplayMessage from './DisplayMessage';
-import ImageKit from './ImageKit';
 import CommentDetails from './CommentDetails';
 
 const Comments = ({postId, onClick}) => {
@@ -31,20 +29,19 @@ const Comments = ({postId, onClick}) => {
     }
 
     if(comments.length<1){
-        return <span className='pt-8'>No comments found. Be the first to make a comment.</span>
+        return <DisplayMessage message='No comments found. Be the first one.'/>
     }
-    console.log(comments);
     return (
         <ul className='flex flex-col gap-4 my-6'>
         {
             comments && comments.map((comment)=>{
                 return <li key={comment._id} className='flex flex-col gap-4 border-b pb-4'>
-                            <CommentDetails comment={comment} onClick={onClick}/>
-                            {
-                                comment.children && comment.children.map(child=>{
-                                    return <ChildComment key={child._id} data={child} onReplyClick={onClick}/>
-                                })
-                            }
+                        <CommentDetails comment={comment} onClick={onClick}/>
+                        {
+                            comment.children && comment.children.map(child=>{
+                                return <ChildComment key={child._id} data={child} onReplyClick={onClick}/>
+                            })
+                        }
                 </li>
             })   
         }

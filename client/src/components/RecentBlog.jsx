@@ -5,12 +5,13 @@ import SectionTitleWithLine from './SectionTitleWithLine';
 import PostImage from './PostImage';
 import MyLink from './MyLink';
 import NewsLetterForm from './NewsLetterForm';
+import RightAside from './RightAside';
 
 const RecentBlog = () => {
   return (
     <section id='recent-blog' className="recent-blog max-w-6xl mx-auto px-4 py-10">
         <div className="flex flex-col md:flex-row gap-4">
-            <div className="left md:w-2/3">
+            <div className="left md:w-2/3 mt-4">
                 <SectionTitleWithLine title={'Popular Post'}/>
                 <div className="post-container grid md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-4 mt-4">
@@ -45,13 +46,10 @@ const RecentBlog = () => {
                 </div>
             </div>
             <div className="right md:w-1/3 flex gap-4 flex-col">
-                <SectionTitleWithLine title={'Social Media'}/>
-                <SiteSocialWidget/>
+                <RightAside/>
                 {/* <div className="popular-widget my-7">
                     <SectionTitleWithLine title={'Popular Post'}/>
                 </div> */}
-                <SectionTitleWithLine title={'NewsLetter'}/>
-                <NewsLetterForm/>
             </div>
         </div>
     </section>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import PageMainTitle from '../components/PageMainTitle'
 import PostImage from '../components/PostImage'
 import MyLink from '../components/MyLink'
@@ -6,6 +6,7 @@ import StyledButton from '../components/StyledButton'
 import PostMetaData from '../components/PostMetaData'
 import axios from 'axios'
 import MyInfiniteScroll from '../components/MyInfiniteScroll'
+import RightAside from '../components/RightAside'
 
 const Blogs = () => {
     const [allPost, setAllPost] = useState([])
@@ -18,9 +19,10 @@ const Blogs = () => {
     return (
         <section className='blog-section'>
             <PageMainTitle title={'Blogs'}/>
-            {
+            <div className="max-w-6xl mx-auto px-6 my-6 flex flex-col md:flex-row gap-4">
+                {
                 <MyInfiniteScroll fetchPosts={fetchPosts} setData={setAllPost} items={allPost} queryKey={['BlogPost']}>
-                    <div className='max-w-6xl mx-auto px-6 my-6 grid md:grid-cols-3 row-auto gap-2'>
+                    <div className=' grid md:grid-cols-2 row-auto gap-2'>
                         {
                             allPost.length > 0 &&
                             allPost.map((item)=> {
@@ -49,7 +51,7 @@ const Blogs = () => {
                                             authorLink={item.user.username}
                                             />
                                             <p>{item.desc}</p>
-                                            <StyledButton><a href={`/blog/${item.slug}`}>Read More</a></StyledButton>
+                                            <StyledButton><a href={`/blog/${item.slug}`} className='w-full'>Read More</a></StyledButton>
                                         </div>
                                     </div> 
                             })
@@ -57,6 +59,9 @@ const Blogs = () => {
                     </div>
                 </MyInfiniteScroll>
             }
+            <RightAside/>
+            </div>
+            
         </section>
     )
 }
