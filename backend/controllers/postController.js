@@ -1,6 +1,7 @@
 import Post from '../models/postModel.js'
 import User from '../models/userModel.js'
 import ImageKit from 'imagekit'
+import { ObjectId } from 'bson'
 
 const imagekit = new ImageKit({
     urlEndpoint: process.env.IK_URL_ENDPOINT,
@@ -16,6 +17,7 @@ export const getPosts = async (req, res) => {
     .populate('category', 'name slug')
     .limit(limit)
     .skip(skip)
+
     const allPost = await Post.countDocuments(filters)
     const hasMore = page * limit < allPost
     res.status(200).json({posts, hasMore})
@@ -24,7 +26,7 @@ export const getPosts = async (req, res) => {
 export const getPost = async (req, res) => {
 
     const post = await Post.aggregate([
-        { $match: { slug: req.params.slug } },
+        { $match: { ...req.params } },
         {
           $lookup: {
             from: 'comments',
@@ -45,10 +47,10 @@ export const getPost = async (req, res) => {
         },
         {
             $lookup: {
-              from: 'users',
-              localField: 'user',
-              foreignField: '_id',
-              as: 'user'
+                from: 'users',
+                localField: 'user',
+                foreignField: '_id',
+                as: 'user'
             }
         },
         { $unwind: '$user' }, 
@@ -66,6 +68,48 @@ export const getPost = async (req, res) => {
     res.status(200).json(post)
 }
 
+export const getPostByUserId = async(req, res)=>{
+  console.log(req.params);
+    const result = await User.aggregate([
+        { $match: { clerkUserId: req.params.userId } }, // Match the user
+        {
+          $lookup: {
+            from: 'posts',
+            localField: '_id',
+            foreignField: 'user',
+            as: 'posts',
+          },
+        },
+        {
+          $addFields: {
+            totalPosts: { $size: '$posts' },
+          },
+        },
+        {
+          $unwind: {
+            path: '$posts',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $lookup: {
+            from: 'comments',
+            localField: 'posts._id',
+            foreignField: 'post',
+            as: 'postComments',
+          },
+        },
+        {
+          $group: {
+            _id: '$_id',
+            totalPosts: { $first: '$totalPosts' },
+            totalComments: { $sum: { $size: '$postComments' } },
+          },
+        },
+      ]);
+      console.log(result);
+      return res.status(200).json(result)
+}
 export const createPost = async (req, res) => {
     const clerkUserId = req.auth.userId
     if (!clerkUserId) {

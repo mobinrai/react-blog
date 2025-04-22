@@ -211,17 +211,18 @@ const SingleBlog = () => {
                                 </div>
                             </div>
                             <div id='comments' className="comments-section my-6 scroll-mt-4">
-                                <SectionTitleWithLine title={'Comments'} divClassName={'mb-6'}/>
-                                {
-                                    post._id &&
-                                    <Comments postId={post._id} onClick={setReplayParentId}/>
-                                }
-                                
-                                <div className='my-6'>
-                                    <SectionTitleWithLine title={'Leave a Reply'}/>
-                                    <p className='text-gray-400 mt-4'>Your email will not be published</p>
+                                <div className="border-b py-4">
+                                    <SectionTitleWithLine title={'Comments'} divClassName={'mb-6'}/>
+                                    {
+                                        post._id &&
+                                        <Comments postId={post._id} onClick={setReplayParentId}/>
+                                    }
+                                </div>                                
+                                <div className='my-6 bg-[#ecf0f1] px-6 py-7'>
+                                    <SectionTitleWithLine headingClassName='bg-[#ecf0f1]' title='Leave a Reply'/>
+                                    <p className='text-gray-700 py-4'>Your email will not be published</p>
                                     <p className='my-2 text-red-600 text-sm'>Note: Field with * is mandatory</p>
-                                    <form ref={formRef} onSubmit={(event)=>handleSubmit(event, post._id)} className='flex flex-col gap-4 mt-6'>
+                                    <form ref={formRef} onSubmit={(event)=>handleSubmit(event, post._id)} className='flex flex-col gap-4 mt-6 '>
                                         <div className="flex gap-4">
                                         <TextField required id="fullName" inputRef={inputRef} name='fullName' label="Full Name"  fullWidth/>
                                         <TextField required id="email" name='email' label="Email" fullWidth/>

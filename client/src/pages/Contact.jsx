@@ -24,8 +24,8 @@ const Contact = () => {
                         <p><span className="rounded-full border p-2  my-2 mr-6"><Place sx={{ color: red[500] }} fontSize='small'/></span> 123 6th St.Melbourne, FL 32904</p>
                     </address>
                 </div>
-                <div className='contact-form-section my-7'>
-                    <SectionTitleWithLine title={'Mail us'}/>
+                <div className='contact-form-section my-7 dark:bg-[#ecf0f1] p-4'>
+                    <SectionTitleWithLine headingClassName='dark:bg-[#ecf0f1]' title={'Mail us'}/>
                     <form action="" className="flex flex-col gap-6 mt-6">
                         <TextField required id="email" label="Required" defaultValue="Email" fullWidth/>
                         <TextField required id="subject" label="Required" defaultValue="Subject" fullWidth/>

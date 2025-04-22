@@ -15,6 +15,16 @@ export const useFetchAllPost = ()=>{
     })
 }
 
+export const fetchAllPostByUserId = (userId)=>{
+    return useQuery({
+        queryKey: ['posts'],
+        queryFn: async ()=>{
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/posts/user/${userId}`)
+            return res.data
+        }
+    })
+}
+
 export const useFetchPostBySlug = (slug, queryKey)=>{
     return useQuery({
         queryKey: queryKey,

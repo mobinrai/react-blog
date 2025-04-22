@@ -11,6 +11,11 @@ import About from './src/pages/About'
 import Author from './src/pages/Author'
 import CreateBlog from './src/pages/CreateBlog'
 import SingleCategory from './src/pages/SingleCategory'
+import UserDashboard from './src/pages/UserDashboard'
+import UnAuthorized from './src/error_pages/UnAuthorized'
+import ProtectedRoute from './src/routers/ProtectedRoute'
+import UserLayout from './src/layouts/UserLayout'
+import ManageProfile from './src/pages/ManageProfile'
 
 const route = createBrowserRouter([
     {
@@ -45,8 +50,33 @@ const route = createBrowserRouter([
                 element:<Author/>
             },
             {
-                path:"/create-blog",
-                element:<CreateBlog/>
+                
+                element:<ProtectedRoute/>,
+                children:[
+                    {
+                        
+                        element:<UserLayout/>,
+                        children:[
+                            {
+                                path:"/user/create-post",
+                                element:<CreateBlog/>
+                            },
+                            {
+                                path:"/user/manage-profile",
+                                element:<ManageProfile/>
+                            },
+                            {
+                                path:"/user/dashboard",
+                                element:<UserDashboard/>
+                            },
+                        ]
+                    }
+                ]
+            },
+            
+            {
+                path:"/unauthorized",
+                element:<UnAuthorized/>
             }
         ],
     },

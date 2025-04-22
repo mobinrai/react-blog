@@ -1,17 +1,30 @@
-import { SignedIn, SignedOut, useAuth, UserButton, useUser } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, useAuth, useClerk, UserButton, useUser } from '@clerk/clerk-react'
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import MainCategories from './MainCategories'
-import {Menu, Close, AccountCircle} from '@mui/icons-material'
+import {Menu, Close, AccountCircle, Settings, ExitToApp} from '@mui/icons-material'
 
 export const Navbar = () => {
     const [openMenu, setOpenMenu] = useState(false)
     const [dropDownMenu, setDropDownMenu] = useState(false)
+    const queryParams = new URLSearchParams(location.search);
+    const [showProfilePop, setShowProfilePop] = useState(false)
+    const { signOut } = useClerk()
+    const redirectUrl = queryParams.get('redirectUrl') || '/';
     const {getToken} = useAuth()
     const {user} = useUser()
+
     useEffect(()=>{
         getToken().then(token=>{ console.log(token);})
     },[])
+
+    const handleSignOutClick = ()=>{
+        setShowProfilePop(!showProfilePop)
+        signOut({ redirectUrl: '/' })
+    }
+    const handleProfileClick = ()=>{
+        setShowProfilePop(!showProfilePop)
+    } 
     return (
         <>
             <div className='pt-4 md:block relative'>
@@ -25,7 +38,7 @@ export const Navbar = () => {
                         </div>
                         <div className='hidden md:flex items-center gap-4'>
                         <nav className='' id='main-menu' aria-label='main'>
-                            <ul className='py-6 flex gap-4'>
+                            <ul className='py-6 flex items-center gap-4'>
                             <li>
                                 <Link
                                 to='/'
@@ -60,35 +73,76 @@ export const Navbar = () => {
                             </li>
                             {
                                 user &&
-                                <li>
-                                <Link
-                                to='/create-blog'
-                                className='font-bold text-base hover:text-[#ee4276] uppercase tracking-wider'
-                                >
-                                Create Blog
-                                </Link>
-                            </li>
+                                <>
+                                    <li>
+                                        <Link
+                                        to='/create-blog'
+                                        className='font-bold text-base hover:text-[#ee4276] uppercase tracking-wider'
+                                        >
+                                        Create Blog
+                                        </Link>
+                                    </li>
+                                    <li className='relative'>
+                                        <div className="flex gap-2 items-center">
+                                            <span className='text-sm font-semibold'>{user.fullName}</span>
+                                            <img src={user.imageUrl} alt="" srcSet="" className='rounded-full w-7 cursor-pointer' onClick={handleProfileClick}/>
+                                        </div>
+                                        {showProfilePop && (
+                                            <div className="absolute mt-4 w-80 -left-44 p-4 dark:text-black bg-white rounded shadow-lg border z-10">
+                                                <ul className="flex flex-col gap-4">
+                                                <li className="border-b p-2">
+                                                    <Link
+                                                        to='/user/dashboard'
+                                                        className='text-sm font-semibold hover:text-[#ee4276] uppercase tracking-wider'
+                                                        onClick={()=>setShowProfilePop(!showProfilePop)}
+                                                        >
+                                                            <AccountCircle/> Dashboard
+                                                    </Link>
+                                                </li>
+                                                <li className="border-b p-2">
+                                                    <Link
+                                                        to='/user/manage-profile'
+                                                        className='text-sm font-semibold hover:text-[#ee4276] uppercase tracking-wider'
+                                                        onClick={()=>setShowProfilePop(!showProfilePop)}
+                                                        >
+                                                           <Settings/> Manage Profile
+                                                    </Link>
+                                                </li>
+                                                <li className="border-b p-2">
+                                                    <button
+                                                        type='button'
+                                                        className='text-sm font-semibold hover:text-[#ee4276] uppercase tracking-wider'
+                                                        onClick={handleSignOutClick}
+                                                        >
+                                                            <ExitToApp/> SignOut
+                                                    </button>
+                                                </li>
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </li>
+                                </>
                             }
-                            
+                            {
+                                !user && 
+                                <li>
+                                    <SignedOut>
+                                        <Link to='/login' className=''>
+                                            <button className='rounded-3xl bg-gray-400 text-white py-2 px-4 font-bold'>
+                                                Login
+                                            </button>
+                                        </Link>
+                                    </SignedOut>
+                                </li>
+
+                            }
                             {openMenu && (
                                 <MainCategories className='flex gap-4 items-start' />
                             )}
                             </ul>
                         </nav>
-                        <SignedOut>
-                            <Link to='/login' className=''>
-                                <button className='rounded-3xl bg-gray-400 text-white py-2 px-4 font-bold'>
-                                    Login
-                                </button>
-                            </Link>
-                        </SignedOut>
-                        <SignedIn>
-                            <UserButton>
-                                <UserButton.MenuItems>
-                                    <UserButton.Link label='User Dashboard' labelIcon={<AccountCircle/>}href='/user/dashboard'/>
-                                </UserButton.MenuItems>
-                            </UserButton>
-                        </SignedIn>
+                        
+                        
                         </div>
                     </div>
                     <Menu className='invisible max-md:visible absolute right-5 top-5' onClick={()=>setOpenMenu((prev)=>!prev)}/>
