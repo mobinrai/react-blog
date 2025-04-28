@@ -76,20 +76,27 @@ export const Navbar = () => {
                                 <>
                                     <li>
                                         <Link
-                                        to='/create-blog'
+                                        to='/user/create-post'
                                         className='font-bold text-base hover:text-[#ee4276] uppercase tracking-wider'
                                         >
                                         Create Blog
                                         </Link>
                                     </li>
                                     <li className='relative'>
-                                        <div className="flex gap-2 items-center">
-                                            <span className='text-sm font-semibold'>{user.fullName}</span>
                                             <img src={user.imageUrl} alt="" srcSet="" className='rounded-full w-7 cursor-pointer' onClick={handleProfileClick}/>
-                                        </div>
                                         {showProfilePop && (
-                                            <div className="absolute mt-4 w-80 -left-44 p-4 dark:text-black bg-white rounded shadow-lg border z-10">
+                                            <div className="absolute mt-4 w-80 -left-44 p-4 dark:text-black bg-white rounded-lg shadow-lg border z-10">
                                                 <ul className="flex flex-col gap-4">
+                                                <li className="border-b p-2 flex gap-4">
+                                                    <div>
+                                                        <img src={user.imageUrl} alt=""  className='rounded-full w-7'/>
+                                                    </div>                                                  
+                                                    <div className="flex flex-col">
+                                                        <span className='text-sm font-semibold'>{user.fullName}</span>
+                                                        <span className='text-sm font-semibold'>{user.username}</span>
+                                                    </div>
+                                                    
+                                                </li>
                                                 <li className="border-b p-2">
                                                     <Link
                                                         to='/user/dashboard'

@@ -16,6 +16,7 @@ import UnAuthorized from './src/error_pages/UnAuthorized'
 import ProtectedRoute from './src/routers/ProtectedRoute'
 import UserLayout from './src/layouts/UserLayout'
 import ManageProfile from './src/pages/ManageProfile'
+import ViewAllPosts from './src/pages/users/ViewAllPosts'
 
 const route = createBrowserRouter([
     {
@@ -61,13 +62,18 @@ const route = createBrowserRouter([
                                 path:"/user/create-post",
                                 element:<CreateBlog/>
                             },
-                            {
-                                path:"/user/manage-profile",
-                                element:<ManageProfile/>
-                            },
+                            
                             {
                                 path:"/user/dashboard",
                                 element:<UserDashboard/>
+                            },
+                            {
+                                path:"/user/view-all-post",
+                                element:<ViewAllPosts/>
+                            },
+                            {
+                                path:"/user/manage-profile",
+                                element:<ManageProfile/>
                             },
                         ]
                     }

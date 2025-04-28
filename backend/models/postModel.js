@@ -11,8 +11,8 @@ const postSchema = new mongoose.Schema({
         ref:"Category",
         required:true
     },
-    img:{
-        type:String
+    mainImg:{
+        type:Object
     },
     title:{
         type:String,
@@ -37,6 +37,22 @@ const postSchema = new mongoose.Schema({
     visited:{
         type:Number,
         default:0
+    },
+    fileId:{
+        type:Array,
+        default:[]
+    },
+    images:{
+        type:Array,
+        default:[]
+    },
+    videos:{
+        type:Array,
+        default:[]
+    },
+    tags:{
+        type:Array,
+        default:[]
     }
 },{timestamps:true});
 

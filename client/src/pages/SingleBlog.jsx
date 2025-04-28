@@ -16,6 +16,7 @@ import axios from 'axios'
 import DisplayMessage from '../components/DisplayMessage'
 import { useAuth } from '@clerk/clerk-react'
 import RightAside from '../components/RightAside'
+import MyLink from '../components/MyLink'
 
 const SingleBlog = () => {
     const {slug} = useParams()
@@ -109,6 +110,7 @@ const SingleBlog = () => {
     const handleCancel=()=>{
         setReplayParentId(null)
     }
+    const width = post.relatedPosts.length ? (100/post.relatedPosts.length):100;
     return (
         <section id="single-blog-page" className="single-blog-page mt-4">
             <div className="max-w-6xl mx-auto px-4">
@@ -162,14 +164,22 @@ const SingleBlog = () => {
                                     <span className='py-0.5 px-2  text-white font-bold mr-2'>in</span>LinkedIn
                                 </Link>
                             </ul>
-                            <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content }} />
-                            <div className="post-tags mt-4">
-                                <ul className="post-tags-list flex gap-2">
-                                    <li><Link to="/blogs" className='uppercase'>tags: </Link></li>
-                                    <li><Link to="/blogs" className='bg-gray-400 py-1 px-2 hover:bg-[#ee4266] transition-all duration-1000'>Social</Link></li>
-                                    <li><Link to="/blogs" className='bg-gray-400 py-1 px-2 hover:bg-[#ee4266] transition-all duration-1000'>All Post</Link></li>
-                                </ul>
-                            </div>                        
+                            <div className="post-content bg-[#ecf0f1] p-2" dangerouslySetInnerHTML={{ __html: post.content }} />
+                            {
+                                post.tags && (
+                                    <div className="post-tags mt-4">                                        
+                                        <ul className="post-tags-list flex gap-2">
+                                            <li><Link to="/blogs" className='uppercase'>tags: </Link></li>
+                                        {
+                                            post.tags.map((tag,index)=>(
+                                                <li key={tag+index}>
+                                                    <Link to="/blogs" className='bg-gray-400 py-1 px-2 hover:bg-[#ee4266] transition-all duration-1000 capitalize'>{tag}</Link></li>
+                                            ))   
+                                        }
+                                        </ul>                                            
+                                    </div> 
+                                )
+                            }                                              
                             <div className="about-author my-6">
                                 <SectionTitleWithLine divClassName={'mb-6'} title={'About Author'}/>
                                 <div className="author-media-left relative table-cell align-top mt-6 pr-7">
@@ -198,18 +208,34 @@ const SingleBlog = () => {
                                     </ul>
                                 </div>
                             </div>
-                            <div className="related-post-section my-8 py-6">
-                                <SectionTitleWithLine title={'Related Post'}/>
-                                <div className="related-post-wrapper flex gap-4">
-                                    {/* <div className="flex flex-col gap-4">
-                                        <PostImage path={'default-image.jpg'} className='transition-transform ease-in duration-700 group-hover:scale-[1.1]' width={300}/>
-                                        <div className="flex flex-col gap-4 justify-end">
-                                            <MyLink linkName='Category' type={'category'}/>
-                                            <MyLink linkName={'Lorem ipsum, dolor sit amet consectetur adipisicing elit.'}/>
-                                        </div>
-                                    </div> */}
+                            {
+                                post.relatedPosts && (
+                                    <div className="related-post-section my-8 py-6">
+                                    <SectionTitleWithLine title={'Related Post'}/>
+                                    <div className="related-post-wrapper flex gap-4 mt-4">
+                                        {
+                                            
+                                            post.relatedPosts.map((post,index)=>(                                                
+                                                <div key={post+index} className={`flex flex-col gap-4 w-[${width}]`}>
+                                                    <ImageKit path={post.img} className={'transition-transform ease-in duration-700 group-hover:scale-[1.1]'}/>
+                                                    {/* <PostImage path={post.img} className='' width={300}/> */}
+                                                    <div className="flex flex-col gap-1 justify-end">
+                                                        <p className='text-gray-400 text-sm'>{formatCreatedDate(post.createdAt)}</p>
+                                                        <MyLink 
+                                                            to={`/blog/${post.slug}`} 
+                                                            linkName={post.title} 
+                                                            className={'text-sm'}
+                                                            />
+                                                        <p className='text-sm text-gray-400 font-semibold'>{post.desc}</p>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
                                 </div>
-                            </div>
+                                )
+                            }
+                            
                             <div id='comments' className="comments-section my-6 scroll-mt-4">
                                 <div className="border-b py-4">
                                     <SectionTitleWithLine title={'Comments'} divClassName={'mb-6'}/>

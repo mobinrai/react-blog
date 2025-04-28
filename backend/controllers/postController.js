@@ -1,13 +1,5 @@
 import Post from '../models/postModel.js'
 import User from '../models/userModel.js'
-import ImageKit from 'imagekit'
-import { ObjectId } from 'bson'
-
-const imagekit = new ImageKit({
-    urlEndpoint: process.env.IK_URL_ENDPOINT,
-    publicKey: process.env.IK_PUBLIC_KEY,
-    privateKey: process.env.IK_PRIVATE_KEY
-})
 
 export const getPosts = async (req, res) => {
     const { page = parseInt(req.query.page) || 1, limit = parseInt(req.query.limit)|| 3, ...filters } = req.query;
@@ -37,7 +29,7 @@ export const getPost = async (req, res) => {
         },
         {
           $addFields: {
-            totalComments: { $size: '$comments' } 
+            totalComments: { $size: { $ifNull: ['$comments', []] } } 
           }
         },
         {
@@ -53,7 +45,7 @@ export const getPost = async (req, res) => {
                 as: 'user'
             }
         },
-        { $unwind: '$user' }, 
+        { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } }, 
         {
             $lookup: {
               from: 'categories',
@@ -62,53 +54,90 @@ export const getPost = async (req, res) => {
               as: 'category'
             }
         },
-        { $unwind: '$category' }
-        
+        { $unwind: { path: '$category', preserveNullAndEmptyArrays: true } },
+        {
+            $lookup: {
+                from: 'posts',
+                let: { currentTags: { $ifNull: ['$tags', []] }, currentId: '$_id' },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $ne: ['$_id', '$$currentId'] },
+                          { $gt: [{ $size: { $setIntersection: [{ $ifNull: ['$tags', []] }, '$$currentTags'] } }, 0] }
+                        ]
+                      }
+                    }
+                  },
+                  { $limit: 4 },
+                  {
+                    $project: {
+                      title: 1,
+                      tags: 1,
+                      img:1,
+                      desc:1,
+                      slug:1,
+                      createdAt:1,
+                      _id:0
+                    }
+                  }
+                ],
+                as: 'relatedPosts'
+              }
+        }
       ])
     res.status(200).json(post)
 }
 
-export const getPostByUserId = async(req, res)=>{
-  console.log(req.params);
+export const getAllPostByUserId = async(req, res)=>{
+    // const result = await User.findOne({ clerkUserId: req.params.userId }).populate('posts', '_id title desc', {strictPopulate:false})
     const result = await User.aggregate([
-        { $match: { clerkUserId: req.params.userId } }, // Match the user
+        { $match:  { clerkUserId: req.params.userId }},
         {
-          $lookup: {
-            from: 'posts',
-            localField: '_id',
-            foreignField: 'user',
-            as: 'posts',
-          },
+            $lookup: {
+                from: 'posts',
+                localField: '_id',
+                foreignField: 'user',
+                as: 'posts',
+            },
         },
         {
-          $addFields: {
-            totalPosts: { $size: '$posts' },
-          },
-        },
-        {
-          $unwind: {
-            path: '$posts',
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $lookup: {
-            from: 'comments',
-            localField: 'posts._id',
-            foreignField: 'post',
-            as: 'postComments',
-          },
-        },
-        {
-          $group: {
-            _id: '$_id',
-            totalPosts: { $first: '$totalPosts' },
-            totalComments: { $sum: { $size: '$postComments' } },
-          },
-        },
-      ]);
-      console.log(result);
-      return res.status(200).json(result)
+            $project: {
+                _id:1,
+                name: 1,         // include any user fields you want
+                posts: {
+                    $map: {
+                        input: '$posts',
+                        as: 'post',
+                        in: {
+                        _id: '$$post._id',
+                        title: '$$post.title',
+                        desc: '$$post.desc',
+                        slug:'$$post.slug',
+                        createdAt:'$$post.createdAt',
+                        updatedAt:'$$post.updatedAt',
+                        },
+                    },
+                },
+              },
+        }
+    ]);
+    // let allPost = []
+    // if(result){
+    //     const mapResult = result[0].posts.map(post=>{
+    //         return {
+    //                 _id:post._id,
+    //                 title:post.title,
+    //                 desc:post.desc
+    //         }
+    //     })
+    //     allPost = [{
+    //         _id:result[0]._id,
+    //         posts:mapResult
+    //     }]
+    // }
+    res.status(200).json(result)
 }
 export const createPost = async (req, res) => {
     const clerkUserId = req.auth.userId
@@ -158,9 +187,4 @@ export const deletePost = async (req, res) => {
     }
 
   res.status(200).json('Post has been deleted successfully.')
-}
-
-export const imgAuth = async (req, res) => {
-    var result = imagekit.getAuthenticationParameters()
-    res.send(result)
 }

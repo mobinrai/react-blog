@@ -3,6 +3,7 @@ import userRouter from './routes/userRoutes.js';
 import commentRouter from './routes/commentRoutes.js';
 import categoryRouter from './routes/categoryRoutes.js';
 import postRouter from './routes/postRoutes.js';
+import imageRouter from './routes/imageKitRoutes.js';
 import connectionDb from './lib/connectDb.js';
 import webhookClerkRouter from './routes/webhookClerkRoutes.js';
 import { clerkMiddleware } from '@clerk/express';
@@ -29,6 +30,7 @@ app.use("/users", userRouter);
 app.use("/categories", categoryRouter);
 app.use("/comments", commentRouter);
 app.use("/posts", postRouter);
+app.use("/imagekit", imageRouter);
 
 app.use((error, req, res, next)=>{
     res.status(error.status || 500)

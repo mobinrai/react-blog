@@ -1,15 +1,13 @@
 import express from "express"
-import { createPost, deletePost, editPost, getPost, getPostByUserId, getPosts, imgAuth } from "../controllers/postController.js"
+import { createPost, deletePost, editPost, getAllPostByUserId, getPost, getPosts } from "../controllers/postController.js"
 
 const router = express.Router()
-
-router.get('/imagekit/auth', imgAuth)
 
 router.get("/", getPosts)
 
 router.get("/:slug", getPost)
 
-router.get("/user/:userId", getPostByUserId)
+router.get("/user/:userId", getAllPostByUserId)
 
 router.post("/", createPost)
 

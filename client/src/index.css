@@ -37,6 +37,14 @@ body{
     border-right: 2px dashed #e8eaed;
 }
 
+.ql-code-block-container{
+    background-color: #f9f9f9;
+    padding: 10px;
+    border: 1px solid #e1e1e1;
+    border-radius: 7px;
+    margin: 10px 0;
+}
+
 @keyframes slide-in{
     0%{
         transform: translateX(100%);

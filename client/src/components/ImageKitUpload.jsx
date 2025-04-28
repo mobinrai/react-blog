@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 const authenticator =  async () => {
     try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/posts/imagekit/auth`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/imagekit/auth`);
         if (!response.ok) {
             const errorText = await response.text();
             console.log(`Request failed with status ${response.status}: ${errorText}`);
@@ -19,30 +19,28 @@ const authenticator =  async () => {
     }
 };
 
-const ImageKitUpload = ({type, children, onSuccess, onChange, onUploadProgress, precent}) => {
+const ImageKitUpload = ({type='image', name='', precent=0,  onSuccess, onChange, onUploadProgress, children}) => {
     const [uploaderKey, setUploaderKey] = useState(0);
-    const [uploadStarted, setUploadStarted] = useState(false);
     const ref = useRef(null)
 
     const handleError = (err) => {
-        setUploadStarted(false)
+        // setUploadStarted(false)
         toast.error('Upload failed');
     };
     const handleSuccess = (res)=>{
         setUploaderKey(prev => prev + 1);
-        setUploadStarted(false)
-        onSuccess(res)
+        onSuccess(res, name)
     }
     const handleUploadProgress =(progress)=>{
         if(onUploadProgress){
             const precentage = Math.round((progress.loaded/progress.total)*100)
             onUploadProgress(precentage)
         }
-        
     }
     
-    const handleChange=()=>{
-        onChange ? onChange() :''
+    const handleChange=(e)=>{
+        console.log(ref.current);
+        onChange ? onChange() :()=>{}
     }
 
     return (
@@ -52,7 +50,6 @@ const ImageKitUpload = ({type, children, onSuccess, onChange, onUploadProgress, 
                 urlEndpoint={import.meta.env.VITE_IK_URL_ENDPOINT}
                 authenticator={authenticator}
             >
-                {/* 👇 Wrap the uploader in a div with dynamic key to ensure it fully remounts */}
                 <div key={uploaderKey}>
                     <IKUpload
                         useUniqueFileName={true}
@@ -60,7 +57,6 @@ const ImageKitUpload = ({type, children, onSuccess, onChange, onUploadProgress, 
                         onSuccess={handleSuccess}
                         accept={`${type}/*`}
                         onUploadProgress={handleUploadProgress}
-                        onUploadStart={() => setUploadStarted(true)}
                         disabled={(precent>0 && precent< 100)}
                         onChange={handleChange}
                         hidden={true}
