@@ -5,7 +5,7 @@ const UserDashboard = () => {
     const {user} = useUser()
     
     return (
-        <div>
+        <div className='px-4'>
             <h1 className='text-2xl capitalize'>welcome to your dashboard {user.fullName}</h1>
             
         </div>

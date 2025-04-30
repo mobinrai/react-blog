@@ -163,8 +163,28 @@ export const createPost = async (req, res) => {
     res.status(200).json(post)
 }
 
+export const getPostById = async (req, res) => {
+    const post = await Post.findOne({_id:req.params.id})
+    res.status(200).json(post)
+}
+
 export const editPost = async (req, res) => {
-    const post = await Post.findOneAndUpdate()
+    let cleanSlug = req.body.title.replace(/[?=\/'*()&^%$#@!:]/g, '')
+    let slug = cleanSlug.replace(/ /g, '-').toLowerCase()
+    let slugExist = await Post.findOne({ slug })
+    let counter = 2
+    while (slugExist) {
+        slug = `${slug}-${counter}`
+        slugExist = await Post.findOne({ slug })
+        counter++
+    }
+    const post = await Post.findOneAndUpdate(
+        { _id: req.params.id }, // Filter: finding the post by ID
+        { $set: {slug, ...req.body} }, // Update: setting the new values for the fields
+        {
+            new: true, // Return the updated document instead of the original
+            runValidators: true, // Run validation checks (optional)
+        })
     res.status(200).json(post)
 }
 

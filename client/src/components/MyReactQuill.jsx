@@ -1,23 +1,5 @@
-import React from 'react'
-import axios from 'axios'
+import React, { useEffect, useState } from 'react'
 import ReactQuill from 'react-quill-new'
-
-
-const deleteImage = async(fileId) =>{
-    try {
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}/imagekit/deleteImage`, {
-            fileId},
-            {
-                headers: {
-                "Content-Type": "application/json",
-                }
-            }
-        );
-        return response
-    } catch (error) {
-        console.error("Axios error:", error);
-    }
-}
 
 const modules = {
     toolbar: [
@@ -40,7 +22,15 @@ const formats = [
     'link',
 ];
 
-const MyReactQuill = ({ value='', ref=null, images, setImages, setValue, setFileId}) => {
+const MyReactQuill = ({ value, ref, images, mainImg, setImages, setValue, setFileId, setButtonDisabled,  deleteImage}) => {
+    const [quillValue, setQuillValue] = useState(value);
+    // const quillRef = useRef(null);
+
+    // useEffect(() => {
+    //     if (ref.current  === null && content) {
+    //         setValue(content);
+    //     }
+    // }, [content, setValue]);
 
     const handleKeyDown = async (event) => {
         const BACKSPACE = 8;
@@ -65,7 +55,8 @@ const MyReactQuill = ({ value='', ref=null, images, setImages, setValue, setFile
         );
       
         if (removedImages.length > 0) {
-          const deleted = await deleteImage(removedImages[0].fileId);
+            setButtonDisabled(true)
+            const deleted = await deleteImage(removedImages[0].fileId);
             if (deleted?.data?.success) {
                 const remainingImages = images.filter(img =>
                     currentImages.includes(img.filePath.replace(/\//g, ''))
@@ -81,22 +72,28 @@ const MyReactQuill = ({ value='', ref=null, images, setImages, setValue, setFile
                     }
                 })
                 setValue(doc.body.innerHTML);
+                setButtonDisabled(false)
             }
         }
     };
-    return (
-            <ReactQuill
-            ref={ref}
-            modules={modules}
-            theme='snow' 
-            className='flex-1 max-sm:mb-3 dark:bg-white dark:text-black' 
-            name="content" 
-            value={value}
-            onChange={setValue}
-            onKeyDown={handleKeyDown}
-            formats={formats}
-            required
-            />
+    const handleChange=(name, value)=>{
+        if(name === 'content' && ref.current !== null) {
+            setValue(value)
+        }
+    }
+    return (        
+        <ReactQuill
+        ref={ref}
+        modules={modules}
+        theme='snow' 
+        className='flex-1 max-sm:mb-3 dark:bg-white dark:text-black min-h-72 mb-12' 
+        name="content" 
+        value={value}
+        onChange={(content) => handleChange('content', content)}
+        onKeyDown={handleKeyDown}
+        formats={formats}
+        required
+        />
     )
 }
 

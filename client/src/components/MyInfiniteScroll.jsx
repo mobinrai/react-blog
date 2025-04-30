@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import DisplayMessage from './DisplayMessage'
 
-const MyInfiniteScroll = ({fetchPosts,queryKey,setData,items, children}) => {
+const MyInfiniteScroll = ({fetchPosts, queryKey, setData, items, children}) => {
     const {
         data,
         error,
@@ -26,9 +26,13 @@ const MyInfiniteScroll = ({fetchPosts,queryKey,setData,items, children}) => {
             setData(items)
         }
     },[status, data])
-
+    
     if(status ==='pending'){
         return <DisplayMessage message='Is Loading...'/>
+    }
+    if(data?.pages?.[0]?.posts?.length === 0){
+        // console.log(data?.pages?.[0]?.posts);
+        return (<div className='w-full font-bold'>Posts not available. If you want you can create it.</div>)
     }
     return (
                 

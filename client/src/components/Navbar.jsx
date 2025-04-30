@@ -76,7 +76,7 @@ export const Navbar = () => {
                                 <>
                                     <li>
                                         <Link
-                                        to='/user/create-post'
+                                        to='/user/posts/new'
                                         className='font-bold text-base hover:text-[#ee4276] uppercase tracking-wider'
                                         >
                                         Create Blog

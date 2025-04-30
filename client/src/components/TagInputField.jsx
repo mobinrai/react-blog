@@ -3,7 +3,7 @@ import { InputAdornment, TextField } from '@mui/material'
 import React from 'react'
 import { toast } from 'react-toastify'
 
-const TagInputField = ({tag, tags, setTag, setTags}) => {
+const TagInputField = ({tag, tags, setTag, setTags, setErrors}) => {
 
     const handleTagChange = (e)=>{
         e.preventDefault()
@@ -45,7 +45,8 @@ const TagInputField = ({tag, tags, setTag, setTags}) => {
                     }
                 }
             }
-            required
+            onFocus={()=>{setErrors(prev=>({...prev, tags:''}))}}
+            // required
             />
     )
 }

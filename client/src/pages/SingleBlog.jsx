@@ -6,9 +6,7 @@ import PostMetaData from '../components/PostMetaData'
 import { Comment, InsertComment } from '@mui/icons-material'
 import { TextField } from '@mui/material'
 import StyledButton from '../components/StyledButton'
-import FollowUs from '../components/FollowUs'
-import NewsLetterForm from '../components/NewsLetterForm'
-import { useFetchPostBySlug } from '../../queries/PostQuery'
+import { useFetchPost } from '../../queries/PostQuery'
 import Comments from '../components/Comments'
 import { formatCreatedDate } from '../../utils/dates'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -19,8 +17,7 @@ import RightAside from '../components/RightAside'
 import MyLink from '../components/MyLink'
 
 const SingleBlog = () => {
-    const {slug} = useParams()
-    const queryKey = ['post', slug]
+    let {slug} = useParams()
     const inputRef = useRef(null)
     const formRef = useRef(null)
     const {getToken} = useAuth()
@@ -32,7 +29,7 @@ const SingleBlog = () => {
         isError, 
         data, 
         error 
-    } = useFetchPostBySlug(slug, queryKey)
+    } = useFetchPost({slug:`${slug}`, queryKey:['post', slug]})
     
     const mutation = useMutation({
         
@@ -128,7 +125,7 @@ const SingleBlog = () => {
                                 <li><a href='#comments' className='flex gap-1 items-center hover:text-[#ee4276]'><Comment/>{post.totalComments} comments</a></li>
                             </PostMetaData>
                         </div>
-                        <ImageKit path={post.img} className={'w-full md:w-[600px]'}/>
+                        <ImageKit path={post.mainImg?.filePath} className={'w-full md:w-[600px]'}/>
                     </div>
                     <div className="flex flex-col md:flex-row  mt-4 gap-8">
                         <div className="md:w-[70%]">
@@ -209,7 +206,7 @@ const SingleBlog = () => {
                                 </div>
                             </div>
                             {
-                                post.relatedPosts && (
+                                post?.relatedPosts?.length >0 && (
                                     <div className="related-post-section my-8 py-6">
                                     <SectionTitleWithLine title={'Related Post'}/>
                                     <div className="related-post-wrapper flex gap-4 mt-4">

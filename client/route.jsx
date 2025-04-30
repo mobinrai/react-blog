@@ -59,10 +59,13 @@ const route = createBrowserRouter([
                         element:<UserLayout/>,
                         children:[
                             {
-                                path:"/user/create-post",
+                                path:"/user/posts/new",
                                 element:<CreateBlog/>
                             },
-                            
+                            {
+                                path:"/user/posts/:id/edit",
+                                element:<CreateBlog/>
+                            },
                             {
                                 path:"/user/dashboard",
                                 element:<UserDashboard/>

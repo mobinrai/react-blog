@@ -19,19 +19,20 @@ const authenticator =  async () => {
     }
 };
 
-const ImageKitUpload = ({type='image', name='', precent=0,  onSuccess, onChange, onUploadProgress, children}) => {
+const ImageKitUpload = ({type='image', name='', precent=0,  onSuccess, onChange, onUploadProgress, setButtonDisabled, children}) => {
     const [uploaderKey, setUploaderKey] = useState(0);
     const ref = useRef(null)
 
     const handleError = (err) => {
-        // setUploadStarted(false)
         toast.error('Upload failed');
     };
     const handleSuccess = (res)=>{
         setUploaderKey(prev => prev + 1);
         onSuccess(res, name)
+        setButtonDisabled(false)
     }
     const handleUploadProgress =(progress)=>{
+        setButtonDisabled(true)
         if(onUploadProgress){
             const precentage = Math.round((progress.loaded/progress.total)*100)
             onUploadProgress(precentage)
