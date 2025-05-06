@@ -34,7 +34,7 @@ const postSchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
-    visited:{
+    read_count:{
         type:Number,
         default:0
     },

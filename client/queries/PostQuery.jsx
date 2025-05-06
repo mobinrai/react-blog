@@ -5,10 +5,10 @@ import { toast } from "react-toastify"
 import { useQuery } from '@tanstack/react-query'
 import axios from "axios"
 
-export const useFetchPost = ({userId, slug, postId, enabled, queryKey})=>{
+export const useFetchPost = ({userId, slug, postId, tag, enabled, queryKey})=>{
     let url = `${import.meta.env.VITE_API_URL}/posts`;
     let key = queryKey || ['posts'];
-    
+    let params;
     if (userId) {
         url = `${import.meta.env.VITE_API_URL}/posts/user/${userId}`;
         key = queryKey || ['posts', 'user', userId];
@@ -19,6 +19,15 @@ export const useFetchPost = ({userId, slug, postId, enabled, queryKey})=>{
         url = `${import.meta.env.VITE_API_URL}/posts/${slug}`;
         key = queryKey || ['post', slug];
         enabled = !!slug
+    }
+    
+    if (tag) {
+        url = `${import.meta.env.VITE_API_URL}/posts`;
+        key = queryKey || ['post', tag];
+        enabled = !!tag
+        params = {
+            tags:tag
+        }
     }
 
     if (postId) {
@@ -31,7 +40,7 @@ export const useFetchPost = ({userId, slug, postId, enabled, queryKey})=>{
     return useQuery({
         queryKey: queryKey,
         queryFn: async ()=>{
-            const res = await axios.get(url)
+            const res = await axios.get(url, params)
             return res.data
         },
         enabled

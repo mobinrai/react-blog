@@ -1,5 +1,5 @@
 import { TextField } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import StyledButton from '../components/StyledButton';
 import { AddCircle, Edit} from '@mui/icons-material'
 import { useFetchAllCategory } from '../../queries/CategoryQuery'
@@ -15,22 +15,8 @@ import SelectManager from '../components/SelectManager';
 import axios from 'axios';
 import MainImageUpload from '../components/MainImageUpload';
 import ImageAndVideoUploader from '../components/ImageAndVideoUploader';
-
-const deleteImage = async(fileId) =>{
-    try {
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}/imagekit/deleteImage`, {
-            fileId},
-            {
-                headers: {
-                "Content-Type": "application/json",
-                }
-            }
-        );
-        return response
-    } catch (error) {
-        console.error("Axios error:", error);
-    }
-}
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 const CreateBlog = () => {
     const { id } = useParams()
@@ -60,6 +46,44 @@ const CreateBlog = () => {
 
     const mutation = useCreateEditPost(id)
     
+    const deleteImageMutation = useMutation({
+        mutationFn: (data)=>{
+            return axios.post(`${import.meta.env.VITE_API_URL}/imagekit/deleteImage`, {...data, isCreatingNew: id? false:true}, {
+                headers: {
+                "Content-Type": "application/json",
+                }
+            })
+        },
+        onSuccess:(data, variables)=>{
+                    const {currentImages, name} = variables
+                    if(name !='mainImg'){
+                        const editor = quillRef.current?.getEditor();
+                        const remainingImages = images.filter(img =>
+                            currentImages.includes(img.filePath.replace(/\//g, ''))
+                        );
+                        setImages(remainingImages)
+                        setFileId([...remainingImages.map(img => img.fileId), ...(mainImg?.fileId ? [mainImg.fileId] : [])])
+            
+                        const doc = new DOMParser().parseFromString(editor.root.innerHTML, 'text/html')
+        
+                        const validImageUrls = remainingImages.map(img => `${import.meta.env.VITE_IK_URL_ENDPOINT}${img.filePath}`)
+                        
+                        doc.querySelectorAll('img').forEach(img => {
+                            if (!validImageUrls.includes(img.src)) {
+                                img.remove();
+                            }
+                        })
+                        setValue(doc.body.innerHTML);
+                        setButtonDisabled(false)
+                    }
+                },
+                onError:(error)=>{
+                    console.log(error);
+                    setButtonDisabled(!buttonDisabled)
+                    toast.error('Could not delete image. please try again later.')
+                } 
+    }) 
+
     useEffect(()=>{
         if(post){
             initializeForm(post)
@@ -93,7 +117,8 @@ const CreateBlog = () => {
         const title = formData.get('title')
         const desc = formData.get('desc')
         const category = formData.get('category')
-        const errors={}
+        const errors = {}
+
         if(isEmptyString(title)) {
             errors.title = 'Please write the blog title.'
         }
@@ -110,9 +135,9 @@ const CreateBlog = () => {
             errors.tags = 'Please add atleast one tag for post.'
         }
         
-        if(isEmptyObject(mainImg)) {
-            errors.image = 'Please add cover image.'
-        }
+        // if(isEmptyObject(mainImg)) {
+        //     errors.image = 'Please add cover image.'
+        // }
 
         if (Object.keys(errors).length > 0) {
             setErrors(errors)
@@ -165,9 +190,11 @@ const CreateBlog = () => {
                     mainImg={mainImg} 
                     setFileId={setFileId} 
                     errors={errors} 
+                    fileId={fileId}
                     setMainImage={setMainImage}
                     setPercentage={setPercentage}
                     setButtonDisabled={setButtonDisabled}
+                    deleteImageMutation={deleteImageMutation}
                     />
                     <div className='flex flex-col gap-4'>
                         <label htmlFor="desc">Description</label>
@@ -209,7 +236,8 @@ const CreateBlog = () => {
                             value={value}
                             mainImg={mainImg}
                             content={post?.content}
-                            deleteImage={deleteImage}
+                            deleteImageMutation={deleteImageMutation}
+                            postId={id}
                             errors={errors}
                             setErrors={setErrors}
                             setButtonDisabled={setButtonDisabled}/>
@@ -218,7 +246,7 @@ const CreateBlog = () => {
                         
                     </div>
                     <StyledButton disabled={mutation.isPending || (percentage > 0 && percentage < 100) || buttonDisabled} width={'25%'} icon={id?<Edit/>:<AddCircle/>} type='submit'>
-                    {mutation.isPending ? 'Adding post...' : id ? 'Edit':'Create'}
+                    {(!id ? 'Adding post...' : 'Editing post...')}
                     </StyledButton>
                 </form>
                 </div>

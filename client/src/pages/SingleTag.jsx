@@ -1,18 +1,19 @@
 import React from 'react'
-import SectionTitleWithLine from './SectionTitleWithLine';
-import MyLink from './MyLink';
-import RightAside from './RightAside';
-import StyledButton from './StyledButton';
-import MyInfiniteScroll from './MyInfiniteScroll';
-import { formatCreatedDate } from '../../utils/dates';
-import { Link } from 'react-router-dom';
-import { Person, Share } from '@mui/icons-material';
-import ImageKit from './ImageKit'
-import MostViewPost from './MostViewPost';
+import { Link, useParams } from 'react-router-dom'
+import useFetchPost from '../hooks/useFetchPost'
+import MyInfiniteScroll from '../components/MyInfiniteScroll'
+import ImageKit from '../components/ImageKit'
+import { Person } from '@mui/icons-material'
+import MyLink from '../components/MyLink'
+import StyledButton from '../components/StyledButton'
+import { formatCreatedDate } from '../../utils/dates'
+import RightAside from '../components/RightAside'
 
-const RecentBlog = ({fetchPosts, allPost, allTags, mostView, setAllPost}) => {
+const SingleTag = () => {
+    const {name} = useParams()
+    const {allPost, setAllPost, fetchPosts} = useFetchPost({tags:name})
     return (
-        <section id='recent-blog' className="recent-blog max-w-6xl mx-auto px-4 py-10">
+        <section id='single-tag-name' className="single-tag-name max-w-6xl mx-auto px-4 py-10">
             <div className="flex flex-col md:flex-row gap-4">
                 <div className="left md:w-2/3 mt-4">
                     {
@@ -44,31 +45,16 @@ const RecentBlog = ({fetchPosts, allPost, allTags, mostView, setAllPost}) => {
                         </div>
                     </MyInfiniteScroll>
                     </div>
-                    }
-                        
+                    }  
                 </div>
                 <div className="right md:w-1/3 flex gap-4 flex-col">
                     <RightAside/>
-                    
-                        { allTags && (<div className="popular-widget my-7">
-                            <SectionTitleWithLine title={'Tags'}/>
-                                <ul className="flex flex-wrap gap-4 mt-4">
-                                    {
-                                        allTags.map((tag, index)=>{
-                                            return <li key={tag+index}>
-                                                <StyledButton>
-                                                <Link to={`/tags/${tag}`} className='w-full !text-sm'>{tag}</Link>
-                                                </StyledButton>
-                                            </li>
-                                        })
-                                    }
-                                </ul>
-                            </div>)
-                        }
                 </div> 
+            
             </div>
-        </section>
+
+        </section>   
     )
 }
 
-export default RecentBlog
+export default SingleTag

@@ -1,5 +1,7 @@
+import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react'
 import ReactQuill from 'react-quill-new'
+import { toast } from 'react-toastify';
 
 const modules = {
     toolbar: [
@@ -22,16 +24,8 @@ const formats = [
     'link',
 ];
 
-const MyReactQuill = ({ value, ref, images, mainImg, setImages, setValue, setFileId, setButtonDisabled,  deleteImage}) => {
-    const [quillValue, setQuillValue] = useState(value);
-    // const quillRef = useRef(null);
-
-    // useEffect(() => {
-    //     if (ref.current  === null && content) {
-    //         setValue(content);
-    //     }
-    // }, [content, setValue]);
-
+const MyReactQuill = ({ value, ref, postId, images, setValue, setButtonDisabled,  deleteImageMutation}) => {
+    
     const handleKeyDown = async (event) => {
         const BACKSPACE = 8;
         const DELETE = 46;
@@ -53,27 +47,15 @@ const MyReactQuill = ({ value, ref, images, mainImg, setImages, setValue, setFil
         const removedImages = images.filter(img =>
             !currentImages.includes(img.filePath.replace(/\//g, ''))
         );
-      
+        
         if (removedImages.length > 0) {
             setButtonDisabled(true)
-            const deleted = await deleteImage(removedImages[0].fileId);
-            if (deleted?.data?.success) {
-                const remainingImages = images.filter(img =>
-                    currentImages.includes(img.filePath.replace(/\//g, ''))
-                );
-                setImages(remainingImages)
-                setFileId([...remainingImages.map(img => img.fileId), ...(mainImg?.fileId ? [mainImg.fileId] : [])])
-
-                const doc = new DOMParser().parseFromString(editor.root.innerHTML, 'text/html')
-                const validImageUrls = remainingImages.map(img => `${import.meta.env.VITE_IK_URL_ENDPOINT}${img.filePath}`)
-                doc.querySelectorAll('img').forEach(img => {
-                    if (!validImageUrls.includes(img.src)) {
-                        img.remove();
-                    }
-                })
-                setValue(doc.body.innerHTML);
-                setButtonDisabled(false)
-            }
+            deleteImageMutation.mutate({
+                fileId:removedImages,
+                postId,
+                name:'img',
+                currentImages
+            })
         }
     };
     const handleChange=(name, value)=>{

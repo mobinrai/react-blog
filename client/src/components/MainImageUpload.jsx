@@ -2,21 +2,20 @@ import React from 'react'
 import ImageKitUpload from './ImageKitUpload'
 import { Image } from '@mui/icons-material'
 
-const MainImageUpload = ({mainImg, errors, setMainImage, setFileId, setPercentage, setButtonDisabled, deleteImage}) => {
+const MainImageUpload = ({mainImg, errors, fileId, setMainImage, setFileId, setPercentage, setButtonDisabled, deleteImageMutation}) => {
     const handleSuccess = (res) => {
-        const deleteMainImage= async ()=>{
-            const result = await deleteImage(mainImg.fileId)
-            if(result.data.success){
-                toast.success("image changed successfully");
-            }
-        }
+        console.log(mainImg);
         if(mainImg?.fileId){
-            deleteMainImage()
-            setFileId([...fileId.filter(id=>mainImg.fileId !==id), res.fileId])
+            deleteImageMutation.mutate({
+                fileId:[mainImg],
+                name:'mainImg',
+            })
+            setFileId([...fileId.filter(id=>mainImg?.fileId !==id), res.fileId])
         }else{
             setFileId(prev => [...prev, res.fileId]);
         }
         setMainImage({fileId:res.fileId,filePath:res.filePath})
+        console.log(mainImg);
     }
   return (
     <div className="form-group flex flex-col gap-4">

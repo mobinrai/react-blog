@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import {RouterProvider} from "react-router-dom"
@@ -10,6 +10,7 @@ import {
     QueryClientProvider,
 } from '@tanstack/react-query'
 import { ToastContainer} from 'react-toastify';
+import Loading from './components/Loading.jsx'
 
 const queryClient = new QueryClient()
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -22,9 +23,11 @@ createRoot(document.getElementById('root')).render(
     <StrictMode>
         <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
             <QueryClientProvider client={queryClient}>
-                <RouterProvider router={route}/>
+                <Suspense fallback={<Loading/>}>
+                    <RouterProvider router={route} />
+                </Suspense>
                 <ToastContainer position='bottom-right'/>
-            </QueryClientProvider>            
+            </QueryClientProvider>
         </ClerkProvider>
     </StrictMode>,
 )

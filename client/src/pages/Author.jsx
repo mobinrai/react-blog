@@ -10,6 +10,7 @@ import { formatCreatedDate } from '../../utils/dates'
 import { useAuth, useUser } from '@clerk/clerk-react'
 import { Check, Clear, DeleteForever, ReadMore } from '@mui/icons-material'
 import { Box, Modal } from '@mui/material'
+import useFetchPost from '../hooks/useFetchPost'
 
 const style = {
     position: 'absolute',
@@ -27,14 +28,7 @@ const style = {
 
 const Author = () => {
     const [openModal, setOpenModal] = useState(false)
-    const [allPost, setAllPost] = useState([])
-    
-    const fetchPosts = async (pageParam) => {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/posts`,{
-            params: {page:pageParam}
-        })
-        return res.data
-    }
+    const {allPost, setAllPost, fetchPosts} = useFetchPost()
     
     return (
         <>
@@ -75,8 +69,8 @@ const Author = () => {
                                         <div>
                                             <PostImage 
                                             to={`/blog/${item.slug}`} 
-                                            path={item.img} 
-                                            alt={item.img}
+                                            path={item.mainImg?.filePath} 
+                                            alt={item.mainImg?.filePath}
                                             width={400} imageClass={'max-w-none'}
                                             />
                                         </div>

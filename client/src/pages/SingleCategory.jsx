@@ -10,6 +10,8 @@ import StyledButton from '../components/StyledButton'
 import axios from 'axios'
 import DisplayMessage from '../components/DisplayMessage'
 import { ReadMore } from '@mui/icons-material'
+import Loading from '../components/Loading'
+import RightAside from '../components/RightAside'
 
 const SingleCategory = () => {
     const {slug} = useParams()
@@ -17,7 +19,7 @@ const SingleCategory = () => {
     const {isPending, isError, data, error} = useFetchCategoryBySlug(slug)   
     
     if(isPending){
-        return <DisplayMessage message='Loading...'/>
+        return <Loading/>
     }
 
     if (isError) {
@@ -33,19 +35,22 @@ const SingleCategory = () => {
     return (
         <section className='blog-section'>
             <PageMainTitle title={data.name}/>
-            <MyInfiniteScroll fetchPosts={fetchCategoryPosts} setData={setAllPost} items={allPost} queryKey={['CategoryPost', data._id]}>
-                    <div className='max-w-6xl mx-auto px-6 my-6 grid md:grid-cols-3 row-auto gap-2'>
+            <div className='max-w-6xl mx-auto px-6 my-6 flex gap-4'>
+                <div className="w-2/3">
+                <MyInfiniteScroll fetchPosts={fetchCategoryPosts} setData={setAllPost} items={allPost} queryKey={['CategoryPost', data._id]}>
+                    <div className='grid md:grid-cols-2 row-auto gap-2'>
                         {
                             allPost.length > 0 &&
                             allPost.map((item)=> {
+                                console.log(item);
                                 let date = new Date(item.createdAt);
                                 const day = date.getDate();
                                 const month = date.toLocaleString('en-US',{month:'long', year:'numeric'})
-                                return <div key={item._id} className="border pb-4 h-fit md:max-w-md max-sm:w-full">
+                                return <div key={item._id} className="border pb-4 h-fit shadow-lg">
                                         <PostImage 
                                         to={`/blog/${item.slug}`} 
-                                        path={item.img} 
-                                        alt={item.img}
+                                        path={item.mainImg?.filePath} 
+                                        alt={item.mainImg?.filePath}
                                         />
                                         <div className="flex flex-col gap-2 p-4">
                                             <MyLink 
@@ -67,7 +72,13 @@ const SingleCategory = () => {
                             })
                         }
                     </div>
-                </MyInfiniteScroll>
+            </MyInfiniteScroll>
+                </div>
+            <div className="w-1/3">
+            <RightAside/>
+            </div>
+            </div>
+            
         </section>
     )
 }

@@ -15,6 +15,7 @@ import DisplayMessage from '../components/DisplayMessage'
 import { useAuth } from '@clerk/clerk-react'
 import RightAside from '../components/RightAside'
 import MyLink from '../components/MyLink'
+import Loading from '../components/Loading'
 
 const SingleBlog = () => {
     let {slug} = useParams()
@@ -54,11 +55,18 @@ const SingleBlog = () => {
     const {pathname} = useLocation()
 
     useEffect(() => {
-        window.scrollTo({
+        if(replayParentId && inputRef.current){
+            inputRef.current.focus();
+        }
+
+        if(pathname){
+            window.scrollTo({
             top:0,
             behavior:'smooth'
         })
-    }, [pathname]);
+        }
+        
+    }, [pathname, replayParentId]);
 
     useEffect(() => {
         window.addEventListener('load', ()=> window.scrollTo({
@@ -66,12 +74,6 @@ const SingleBlog = () => {
             behavior:'smooth'
         }))
     }, []);
-
-    useEffect(() => {
-        if (replayParentId && inputRef.current) {
-          inputRef.current.focus();
-        }
-    }, [replayParentId]);
 
     const handleSubmit = (e,postId)=>{
         e.preventDefault();
@@ -88,7 +90,7 @@ const SingleBlog = () => {
     }
         
     if (isPending){
-        return <DisplayMessage message='Is Loading...'/>
+        return <Loading/>
     }
     if (isError){
         return <DisplayMessage message={`Error: ${error.message}`}/>
@@ -266,14 +268,6 @@ const SingleBlog = () => {
                         </div>
                         <aside className="aside md:w-[30%] flex flex-col gap-4">
                             <RightAside/>
-                            <SectionTitleWithLine title={'Popular Post'}/>
-                            {/* <div className="flex gap-4">
-                                <PostImage path={'default-image.jpg'} alt={'default image'} width={400}/>
-                                <div className="flex flex-col gap-2">
-                                    <MyLink linkName={'Category'} type={'category'} className={'text-sm'}/>
-                                    <MyLink linkName={'Lorem ipsum dolor sit amet consectetur adipisicing elit.'} className={'text-sm'}/>
-                                </div>
-                            </div> */}
                         </aside>
                     </div>
                 </div>

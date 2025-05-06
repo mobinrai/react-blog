@@ -15,7 +15,7 @@ app.use(cors(process.env.CLIENT_URL))
 app.use(clerkMiddleware());
 
 app.use("/webhooks", webhookClerkRouter);
-
+app.set('trust proxy', true)
 app.use(express.json());
 
 // allow cross-origin requests
