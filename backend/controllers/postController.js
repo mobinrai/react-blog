@@ -1,7 +1,8 @@
 import MostView from '../models/mostViewModel.js';
 import Post from '../models/postModel.js'
 import User from '../models/userModel.js'
-import { deleteImagesFromImageKit } from './imageKitController.js';
+import { deleteImagesFromImageKit } from './imageKitController.js'
+import {QuillDeltaToHtmlConverter} from 'quill-delta-to-html'
 
 export const getPosts = async (req, res) => {
     const { page = parseInt(req.query.page) || 1, limit = parseInt(req.query.limit)|| 3, ...filters } = req.query;
@@ -93,12 +94,13 @@ export const getPost = async (req, res) => {
         const ipAddress = req.socket.remoteAddress;
         const postId = post[0]._id
         const alreadyViewed = await MostView.findOne({ip: ipAddress, postId})
-        
+        const converter = new QuillDeltaToHtmlConverter(post[0].content.ops, {inlineStyles:true})
+        const htmlString = converter.convert()
+        post[0].content = htmlString
         if(!alreadyViewed){
             await Post.findByIdAndUpdate(postId, { $inc: { read_count: 1 } }, { new: true });
             const mostView = new MostView({ ip: ipAddress, postId })
             const data = await mostView.save()
-            console.log(data);
         }
     }
     
@@ -157,7 +159,6 @@ export const getAllPostByUserId = async(req, res)=>{
 export const getMostViewPost = async (req,res)=>{
     const limit = parseInt(req.query.limit)|| 5
     const count = parseInt(req.query.count) || 1
-    console.log(limit);
     const result = await Post.find({ read_count: { $gt: count} }).limit(limit).sort({createdAt: -1})
     res.status(200).json(result)
 }
@@ -204,18 +205,27 @@ export const getAllTags = async(req, res) => {
 }
 
 export const editPost = async (req, res) => {
-    let cleanSlug = req.body.title.replace(/[?=\/'*()&^%$#@!:]/g, '')
-    let slug = cleanSlug.replace(/ /g, '-').toLowerCase()
-    let slugExist = await Post.findOne({ slug })
-    let counter = 2
-    while (slugExist) {
-        slug = `${slug}-${counter}`
-        slugExist = await Post.findOne({ slug })
-        counter++
+    let set={}
+
+    if(req.body.title){
+        let cleanSlug = req.body.title.replace(/[?=\/'*()&^%$#@!:]/g, '')
+        let slug = cleanSlug.replace(/ /g, '-').toLowerCase()
+        let slugExist = await Post.findOne({ slug })
+        
+        let counter = 2
+        while (slugExist) {
+            slug = `${slug}-${counter}`
+            slugExist = await Post.findOne({ slug })
+            counter++
+        }
+        set = {slug, ...req.body}
+    }
+    else{
+        set={...req.body}
     }
     const post = await Post.findOneAndUpdate(
         { _id: req.params.id },
-        { $set: {slug, ...req.body} },
+        { $set:  set},
         {
             new: true,
             runValidators: true,
@@ -225,14 +235,10 @@ export const editPost = async (req, res) => {
 
 export const deletePost = async (req, res) => {
     const clerkUserId = req.auth.userId
-
     if (!clerkUserId) {
         return res.status(401).json('Not Authenticated.')
     }
-
     const user = await User.findOne({ clerkUserId })
-    console.log(user);
-    console.log(req.params.id);
     if (!user) {
         return res.status(404).json('User not found.')
     }
@@ -241,7 +247,7 @@ export const deletePost = async (req, res) => {
         user: user._id
     })
     if(post && Object.keys(post).length>0 && post.fileId.length>0){
-        const response = deleteImagesFromImageKit(post.fileId)
+        const response = await deleteImagesFromImageKit(post.fileId)
         if(Object.keys(response).includes('errors')){
             return res.status(500).json('Could not delete post')
         }
@@ -251,7 +257,6 @@ export const deletePost = async (req, res) => {
         user: user._id
     })
 
-    console.log(deletePost);
     if (!deletePost) {
         return res.status(403).json('You are only allowed to deleted your post.')
     }

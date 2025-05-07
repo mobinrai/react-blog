@@ -27,7 +27,7 @@ const postSchema = new mongoose.Schema({
         type:String
     },
     content:{
-        type:String,
+        type:Object,
         required:true
     },
     isFeatured:{

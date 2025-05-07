@@ -50,7 +50,7 @@ const RecentBlog = ({fetchPosts, allPost, allTags, mostView, setAllPost}) => {
                 <div className="right md:w-1/3 flex gap-4 flex-col">
                     <RightAside/>
                     
-                        { allTags && (<div className="popular-widget my-7">
+                        { allTags.length>0 && (<div className="popular-widget my-7">
                             <SectionTitleWithLine title={'Tags'}/>
                                 <ul className="flex flex-wrap gap-4 mt-4">
                                     {

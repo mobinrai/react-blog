@@ -29,32 +29,31 @@ const MyReactQuill = ({ value, ref, postId, images, setValue, setButtonDisabled,
     const handleKeyDown = async (event) => {
         const BACKSPACE = 8;
         const DELETE = 46;
-      
+        
         if (event.keyCode !== BACKSPACE && event.keyCode !== DELETE) return;
-      
+        
         const editor = ref.current?.getEditor();
         if (!editor) return;
       
         const currentContents = editor.getContents();
-      
         const extractImages = (delta) => {
           return delta.ops
             .filter(op => op.insert && op.insert.image)
             .map(op => op.insert.image.replace(import.meta.env.VITE_IK_URL_ENDPOINT, '').replace(/\//g, ''));
         };
       
-        const currentImages = extractImages(currentContents);      
+        const currentImages = extractImages(currentContents)
         const removedImages = images.filter(img =>
             !currentImages.includes(img.filePath.replace(/\//g, ''))
         );
-        
         if (removedImages.length > 0) {
             setButtonDisabled(true)
             deleteImageMutation.mutate({
                 fileId:removedImages,
                 postId,
                 name:'img',
-                currentImages
+                currentImages,
+                isCreatingNew:postId?false:true
             })
         }
     };

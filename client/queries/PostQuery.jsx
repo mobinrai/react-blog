@@ -57,18 +57,22 @@ export function useCreateEditPost(postId=undefined){
     return useMutation({
         mutationFn: async (newPost) => {
             const token = await getToken()
-            return axios[method](url, newPost,{
+            const {resetForm, redirectTo, ...data} = newPost
+            return axios[method](url, data,{
                 headers:{
                     Authorization:`Bearer ${token}`
                 }
             })
         },
-        onSuccess:(res)=>{
-            toast.success(successMessage)
-            if(postId){
-                navigation(`/blog/${res.data.slug}`)
+        onSuccess:(res, variables)=>{
+            const {resetForm, redirectTo} = variables
+            if(typeof resetForm ==='function'){
+                resetForm()
             }
-            
+            if(redirectTo){
+                toast.success(successMessage)
+                navigation(`${redirectTo}`)
+            }
         }
     })
 }

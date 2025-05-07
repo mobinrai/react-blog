@@ -51,7 +51,7 @@ const MyInfiniteScroll = ({fetchPosts, queryKey, setData, setAllTags, items, chi
     }
 
     if(data?.pages?.[0]?.posts?.length === 0){
-        return <DisplayMessage message='Posts not available. If you want you can create it.' className={'font-bold my-20'}/>
+        return <DisplayMessage message='Posts not available.' className={'font-bold my-20'}/>
     }
 
     return (

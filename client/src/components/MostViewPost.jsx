@@ -30,7 +30,7 @@ const MostViewPost = () => {
     return (
         <>
             {
-                mostViews?.data && (
+                mostViews?.data.length>0 && (
                     <div className="popular-widget my-7">
                     <SectionTitleWithLine title={'Most Popular'}/>
                     <ul className="flex flex-wrap gap-4 mt-4">

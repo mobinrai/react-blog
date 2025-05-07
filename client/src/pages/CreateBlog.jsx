@@ -8,7 +8,7 @@ import DisplayMessage from '../components/DisplayMessage'
 import 'react-quill-new/dist/quill.snow.css'
 import MyReactQuill from '../components/MyReactQuill';
 import { useParams } from 'react-router-dom';
-import { isEmptyArray, isEmptyObject, isEmptyString, isValidId } from '../../utils/validation';
+import { isEmptyArray, isEmptyString, isValidId } from '../../utils/validation';
 import TagsManager from '../components/TagsManager';
 import usePostForm from '../hooks/usePostForm';
 import SelectManager from '../components/SelectManager';
@@ -29,7 +29,7 @@ const CreateBlog = () => {
         mainImg, setMainImage,
         images, setImages,
         videos, setVideos,
-        fileId, setFileId,
+        fileIds, setFileIds,
         tag, setTag,
         tags, setTags,
         errors, setErrors,
@@ -48,7 +48,8 @@ const CreateBlog = () => {
     
     const deleteImageMutation = useMutation({
         mutationFn: (data)=>{
-            return axios.post(`${import.meta.env.VITE_API_URL}/imagekit/deleteImage`, {...data, isCreatingNew: id? false:true}, {
+            console.log(data);
+            return axios.post(`${import.meta.env.VITE_API_URL}/imagekit/deleteImage`, {...data}, {
                 headers: {
                 "Content-Type": "application/json",
                 }
@@ -62,7 +63,7 @@ const CreateBlog = () => {
                             currentImages.includes(img.filePath.replace(/\//g, ''))
                         );
                         setImages(remainingImages)
-                        setFileId([...remainingImages.map(img => img.fileId), ...(mainImg?.fileId ? [mainImg.fileId] : [])])
+                        setFileIds([...remainingImages.map(img => img.fileId), ...(mainImg?.fileId ? [mainImg.fileId] : [])])
             
                         const doc = new DOMParser().parseFromString(editor.root.innerHTML, 'text/html')
         
@@ -88,12 +89,8 @@ const CreateBlog = () => {
         if(post){
             initializeForm(post)
         }
-            
-        if(mutation.isSuccess){
-            resetForm()
-        }
-                
-    },[post, mutation.isSuccess])
+                         
+    },[post])
     
     if((enabled && isPending) || isCategoryPending){
         return <DisplayMessage message={'Is Loading...'}/>
@@ -143,17 +140,20 @@ const CreateBlog = () => {
             setErrors(errors)
             return;
         }
+        
         const data = {
             img:mainImg?.filePath,
             title,
             desc,            
             category,
-            content:value,
-            fileId,
+            content:quillRef.current.getEditor().getContents(),
+            fileId:fileIds,
             images,
             videos,
             tags,
-            mainImg
+            mainImg,
+            redirectTo:'/user/view-all-post',
+            resetForm
         }
         mutation.mutate(data)
     }
@@ -188,13 +188,16 @@ const CreateBlog = () => {
 
                     <MainImageUpload 
                     mainImg={mainImg} 
-                    setFileId={setFileId} 
+                    setFileIds={setFileIds} 
                     errors={errors} 
-                    fileId={fileId}
+                    fileIds={fileIds}
+                    postId={id}
                     setMainImage={setMainImage}
                     setPercentage={setPercentage}
                     setButtonDisabled={setButtonDisabled}
                     deleteImageMutation={deleteImageMutation}
+                    mutation={mutation}
+                    resetForm={resetForm}
                     />
                     <div className='flex flex-col gap-4'>
                         <label htmlFor="desc">Description</label>
@@ -220,16 +223,16 @@ const CreateBlog = () => {
                     <div className='flex flex-col md:flex-row gap-1 flex-1'>
                         <ImageAndVideoUploader
                         quillRef={quillRef}
-                        setFileId={setFileId}
+                        setFileIds={setFileIds}
                         setImages={setImages}
                         setVideos={setVideos}
                         setValue={setValue}
+                        mutation={mutation}
                         setButtonDisabled={setButtonDisabled}
                         />
                         <div className='flex flex-col w-full'>
                         <MyReactQuill
-                            setImages={setImages} 
-                            setFileId={setFileId}
+                            setImages={setImages}
                             ref={quillRef}
                             setValue={setValue}
                             images={images}
@@ -237,16 +240,17 @@ const CreateBlog = () => {
                             mainImg={mainImg}
                             content={post?.content}
                             deleteImageMutation={deleteImageMutation}
+                            mutation={mutation}
                             postId={id}
                             errors={errors}
                             setErrors={setErrors}
                             setButtonDisabled={setButtonDisabled}/>
                             {errors.content && <p className="text-red-500 text-sm">{errors.content}</p>}
                         </div>
-                        
                     </div>
                     <StyledButton disabled={mutation.isPending || (percentage > 0 && percentage < 100) || buttonDisabled} width={'25%'} icon={id?<Edit/>:<AddCircle/>} type='submit'>
-                    {(!id ? 'Adding post...' : 'Editing post...')}
+                    
+                    {(mutation.isPending && (!id?'Creating Post':'Editing Post') || (!id?'Create Post':'Edit Post'))}
                     </StyledButton>
                 </form>
                 </div>

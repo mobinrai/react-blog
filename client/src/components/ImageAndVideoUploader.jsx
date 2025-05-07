@@ -2,12 +2,12 @@ import React from 'react'
 import ImageKitUpload from './ImageKitUpload'
 import { Image, VideoCall } from '@mui/icons-material'
 
-const ImageAndVideoUploader = ({quillRef, setFileId, setImages, setVideos, setButtonDisabled, setValue}) => {
+const ImageAndVideoUploader = ({quillRef, setFileIds, setImages, mutation, setVideos, setButtonDisabled, setValue}) => {
     const handleSuccess = (res, name)=>{
         const newData = {
             fileId: res.fileId,
             filePath: res.filePath
-        }            
+        }
         const editor = quillRef.current?.getEditor()
         const src = `${import.meta.env.VITE_IK_URL_ENDPOINT}${newData.filePath}`
         const range = editor.getSelection();
@@ -16,13 +16,14 @@ const ImageAndVideoUploader = ({quillRef, setFileId, setImages, setVideos, setBu
             editor.insertEmbed(position, 'image', src)
             editor.setSelection(position + 1)
             setImages(prev=>([...prev, newData]))
+            
         }else{
             editor.insertEmbed(position, 'video', src);
             editor.setSelection(position + 1);
             setVideos(prev=>([...prev,newData]))
         }        
         setValue(editor.root.innerHTML);            
-        setFileId(prev => [...prev, res.fileId]);
+        setFileIds(prev => [...prev, res.fileId]);
     }
     return (
         <div className='flex md:flex-col gap-2'>

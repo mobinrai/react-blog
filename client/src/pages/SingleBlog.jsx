@@ -22,11 +22,12 @@ const SingleBlog = () => {
     const inputRef = useRef(null)
     const formRef = useRef(null)
     const {getToken} = useAuth()
-    const [replayParentId, setReplayParentId] =useState()
+    const [replayParentId, setReplayParentId] =useState('')
     const queryClient = useQueryClient()
     
     const { 
-        isPending, 
+        isPending,
+        isSuccess, 
         isError, 
         data, 
         error 
@@ -65,7 +66,6 @@ const SingleBlog = () => {
             behavior:'smooth'
         })
         }
-        
     }, [pathname, replayParentId]);
 
     useEffect(() => {
@@ -100,6 +100,7 @@ const SingleBlog = () => {
         return <DisplayMessage message={`Post not found. Please check the name.`}/>
     }
     const post = data[0]
+
     const url=encodeURIComponent(`https://84ae-2a02-3100-646b-1b00-6101-7b14-3dd1-bdc8.ngrok-free.app/blog/${slug}`)
     const {img, desc} = post
     const encodedImg = encodeURIComponent(import.meta.env.VITE_IK_URL_ENDPOINT+'/'+img)
