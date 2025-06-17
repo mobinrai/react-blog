@@ -1,36 +1,40 @@
-import express from  'express';
-import userRouter from './routes/userRoutes.js';
-import commentRouter from './routes/commentRoutes.js';
-import categoryRouter from './routes/categoryRoutes.js';
-import postRouter from './routes/postRoutes.js';
-import imageRouter from './routes/imageKitRoutes.js';
-import connectionDb from './lib/connectDb.js';
-import webhookClerkRouter from './routes/webhookClerkRoutes.js';
-import { clerkMiddleware } from '@clerk/express';
+import express from  'express'
+import userRouter from './routes/userRoutes.js'
+import commentRouter from './routes/commentRoutes.js'
+import categoryRouter from './routes/categoryRoutes.js'
+import postRouter from './routes/postRoutes.js'
+import messageRouter from './routes/messageRoutes.js'
+import subscribeRouter from './routes/subscribeRoutes.js'
+import imageRouter from './routes/imageKitRoutes.js'
+import connectionDb from './lib/connectDb.js'
+import webhookClerkRouter from './routes/webhookClerkRoutes.js'
+import { clerkMiddleware } from '@clerk/express'
 import cors from 'cors'
 
-const app = express();
+const app = express()
 
 app.use(cors(process.env.CLIENT_URL))
-app.use(clerkMiddleware());
-
-app.use("/webhooks", webhookClerkRouter);
+app.use(clerkMiddleware())
 app.set('trust proxy', true)
-app.use(express.json());
+app.use("/webhooks", webhookClerkRouter)
+
+app.use(express.json())
 
 // allow cross-origin requests
 app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", 
-      "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept")
     next()
-});
+})
 
-app.use("/users", userRouter);
-app.use("/categories", categoryRouter);
-app.use("/comments", commentRouter);
-app.use("/posts", postRouter);
-app.use("/imagekit", imageRouter);
+app.use("/users", userRouter)
+app.use("/categories", categoryRouter)
+app.use("/comments", commentRouter)
+app.use("/posts", postRouter)
+app.use("/imagekit", imageRouter)
+app.use('/subscribe', subscribeRouter)
+app.use('/messages', messageRouter)
 
 app.use((error, req, res, next)=>{
     res.status(error.status || 500)
@@ -43,5 +47,5 @@ app.use((error, req, res, next)=>{
 
 app.listen(process.env.PORT, ()=>{
     connectionDb()
-    console.log('Server is runing in port 3000');
+    console.log('Server is runing in port 3000')
 })

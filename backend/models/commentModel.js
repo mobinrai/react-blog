@@ -12,7 +12,7 @@ const commentSchema = new mongoose.Schema({
     website:{
         type:String
     },
-    userId:{
+    user:{
         type:Schema.Types.ObjectId,
         ref:"User",
         default:null
@@ -30,7 +30,13 @@ const commentSchema = new mongoose.Schema({
     message:{
         type:String,
         required:true
+    },
+    isDeleted:{
+        type:Boolean,
+        default:false
     }
 },{timestamps:true});
 
-export default mongoose.model("Comment", commentSchema)
+ const Comment = mongoose.model("Comment", commentSchema)
+ 
+ export default Comment

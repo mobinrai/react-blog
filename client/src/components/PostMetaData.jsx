@@ -14,8 +14,7 @@ const PostMetaData = ({createdAt='', categoryName='', categoryLink='', authorNam
                 <Link to={`/author/${authorLink}`} className='flex gap-1 items-center hover:text-[#ee4276]'>
                 {!dontShowIcon && <Person/>} {authorName}</Link>
             </li>
-        }
-        
+        }        
         <li>
             <Link to={`/cat/${categoryLink}`} className='flex gap-1 items-center hover:text-[#ee4276]'>
             {!dontShowIcon &&<FolderOpen/>}{categoryName}</Link>

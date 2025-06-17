@@ -1,18 +1,18 @@
 import axios from 'axios'
 import React, { useState } from 'react'
 
-const useFetchPost = (param) => {
+const useFetchPost = () => {
     const [allPost, setAllPost] = useState([])
     
-    const fetchPosts = async (pageParam) => {
+    const fetchPosts = async (params) => {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/posts`,{
-            params: {page:pageParam, ...param}
+            params: params
         })
         return res.data
     }
-  return {
-    allPost, setAllPost, fetchPosts
-  }
+    return {
+        allPost, setAllPost, fetchPosts
+    }
 }
 
 export default useFetchPost

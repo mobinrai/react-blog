@@ -4,7 +4,6 @@ import SectionTitleWithLine from '../components/SectionTitleWithLine'
 import RightAside from '../components/RightAside'
 
 const About = () => {
-    console.log('will this run although is not clicked');
     return (
         <section className='blog-section'>
             <PageMainTitle title={'About us'}/>

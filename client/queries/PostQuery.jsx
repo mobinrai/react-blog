@@ -8,21 +8,21 @@ import axios from "axios"
 export const useFetchPost = ({userId, slug, postId, tag, enabled, queryKey})=>{
     let url = `${import.meta.env.VITE_API_URL}/posts`;
     let key = queryKey || ['posts'];
-    let params;
+    let params = {};
+    
     if (userId) {
-        url = `${import.meta.env.VITE_API_URL}/posts/user/${userId}`;
+        url += `?user=${userId}`;
         key = queryKey || ['posts', 'user', userId];
-        enabled = !!userId
+        enabled = enabled
     }
 
     if (slug) {
-        url = `${import.meta.env.VITE_API_URL}/posts/${slug}`;
+        url += `/${slug}`;
         key = queryKey || ['post', slug];
         enabled = !!slug
     }
     
     if (tag) {
-        url = `${import.meta.env.VITE_API_URL}/posts`;
         key = queryKey || ['post', tag];
         enabled = !!tag
         params = {
@@ -31,12 +31,10 @@ export const useFetchPost = ({userId, slug, postId, tag, enabled, queryKey})=>{
     }
 
     if (postId) {
-        url = `${import.meta.env.VITE_API_URL}/posts/id/${postId}`;
+        url += `/id/${postId}`;
         key = queryKey || ['post', postId];
         enabled = !!postId
     }
-
-
     return useQuery({
         queryKey: queryKey,
         queryFn: async ()=>{
@@ -47,32 +45,62 @@ export const useFetchPost = ({userId, slug, postId, tag, enabled, queryKey})=>{
     })
 }
 
-export function useCreateEditPost(postId=undefined){
+export const useFetchPostById = (postId)=>{
+    const {getToken} = useAuth()
+    return useQuery({
+        queryKey:['singlePost', postId],
+        queryFn: async()=>{
+            const token = await getToken()
+            const result = await axios.get(`${import.meta.env.VITE_API_URL}/posts/id/${postId}`, {
+                headers:{
+                    Authorization:`Bearer ${token}`
+                }
+            })
+            return result.data
+        },
+        enabled:!!postId,
+        onError: (error)=>{
+            throw new Error(error)
+        }
+    })
+}
+
+
+export const useCreateEditPost=(postId=undefined)=>{
     const {getToken} = useAuth()
     const navigation = useNavigate()
     let url = postId ? `${import.meta.env.VITE_API_URL}/posts/${postId}` : `${import.meta.env.VITE_API_URL}/posts`
     const method = postId ? 'patch':'post'
     const successMessage = postId? "Post edited succesfully." :"Post created succesfully."
-    
+
     return useMutation({
-        mutationFn: async (newPost) => {
+        mutationFn: async ({payLoads, meta}) => {
             const token = await getToken()
-            const {resetForm, redirectTo, ...data} = newPost
-            return axios[method](url, data,{
+            const response = axios[method](url, payLoads,{
                 headers:{
                     Authorization:`Bearer ${token}`
                 }
             })
+            return { response, meta}
         },
-        onSuccess:(res, variables)=>{
-            const {resetForm, redirectTo} = variables
-            if(typeof resetForm ==='function'){
-                resetForm()
+        onSuccess:(data)=>{
+            const {resetForm, redirectTo, saveForm} = data.meta
+            if(saveForm){
+                if(typeof resetForm ==='function'){
+                    window.scrollTo({
+                        top:400,
+                        behavior:'smooth'
+                    })
+                    resetForm()
+                }
+                if(redirectTo){
+                    navigation(`${redirectTo}`)
+                }
+                toast.success(successMessage,{ id: 'edit-create-post' })
+            }else{
+                toast.success('Image uploaded successfully')
             }
-            if(redirectTo){
-                toast.success(successMessage)
-                navigation(`${redirectTo}`)
-            }
+            
         }
     })
 }

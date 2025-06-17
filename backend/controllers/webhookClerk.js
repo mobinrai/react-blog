@@ -1,5 +1,5 @@
-import { Webhook } from "svix";
-import User from "../models/userModel.js"
+import { Webhook } from "svix"
+import { createNewUser, deleteUser } from "./userController.js"
 
 export const webhookClerk = async (req, res)=>{
     const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
@@ -16,22 +16,23 @@ export const webhookClerk = async (req, res)=>{
     try {
         evt = wh.verify(payload, headers);
     } catch (err) {
-        res.status(400).json({
+        return res.status(400).json({
             message:'Webhook verification failed!'
         });
     }
-    if(evt.type === "user.created") {
-        try{
-            const newUser = new User({
-                clerkUserId:evt.data.id,
-                username:evt.data.username,
-                email:evt.data.email_addresses[0].email_address,
-                img:evt.data.image_url
-            })
-            await newUser.save()
-        }catch(error){
-            throw new Error(error)
+    
+    try{
+        if(evt.type === "user.created") {
+        await createNewUser({clerkUserId:evt.data.id,
+            username:evt.data.username,
+            email:evt.data.email_addresses[0].email_address,
+            img:evt.data.image_url})
         }
+        if(evt.type ==='user.deleted'){
+            await deleteUser(evt.data.id)
+        }
+    }catch(err){
+        return res.status(400).json('Fail to operate clerk webhook.');
     }
     return res.status(200).json({message:"Webhook received!"})
 }

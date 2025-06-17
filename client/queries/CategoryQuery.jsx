@@ -13,13 +13,13 @@ export const useFetchCategoryBySlug=(slug)=>{
     })
 }
 
-export const useFetchAllCategory=()=>{
+export const useFetchAllCategory=(queryKey=['categories'])=>{
     const fetchCategory = async ()=>{
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/categories`)
         return res.data
     }
     return useQuery({
-        queryKey: ['categories'],
+        queryKey: queryKey,
         queryFn: fetchCategory
     })
 }

@@ -5,7 +5,7 @@ import DisplayMessage from './DisplayMessage'
 import Loading from './Loading'
 import axios from 'axios'
 
-const MyInfiniteScroll = ({fetchPosts, queryKey, setData, setAllTags, items, children}) => {
+const MyInfiniteScroll = ({fetchFunc, queryKey, setData, items, enabled, children}) => {
     const {
         data,
         error,
@@ -17,25 +17,30 @@ const MyInfiniteScroll = ({fetchPosts, queryKey, setData, setAllTags, items, chi
         status,
       } = useInfiniteQuery({
         queryKey: queryKey,
-        queryFn: ({pageParam=1})=>fetchPosts(pageParam),
+        queryFn: ({pageParam=1})=>{
+            return fetchFunc(pageParam)
+        },
         initialPageParam:1,
+        enabled:enabled,
         getNextPageParam: (lastPage, pages) => {
-            return lastPage.hasMore ? pages.length + 1 : undefined
+            return lastPage?.hasMore ? pages.length + 1 : undefined
         },
         onError:(error)=>{
+            console.log(error);
             if(axios.AxiosError){
                 console.log(error);
             }
             throw new Error(error)
+            
         }
     })
     useEffect(()=>{
         if(status==='success'){
-            const items = data.pages.flatMap(page=>page.posts)
+            const items = data.pages?.flatMap(page=> page?.result)
             setData(items)
         }
     },[status, data])
-    
+
     if(status ==='pending'){
         return <Loading/>
     }
@@ -49,11 +54,10 @@ const MyInfiniteScroll = ({fetchPosts, queryKey, setData, setAllTags, items, chi
         }
         return <DisplayMessage message={message}/>
     }
-
-    if(data?.pages?.[0]?.posts?.length === 0){
+    if(data?.pages?.[0]?.result?.length === 0){
         return <DisplayMessage message='Posts not available.' className={'font-bold my-20'}/>
     }
-
+    
     return (
                 
         <InfiniteScroll
@@ -66,7 +70,7 @@ const MyInfiniteScroll = ({fetchPosts, queryKey, setData, setAllTags, items, chi
                 }
             }
             loader={<DisplayMessage message='Loading...'/>}
-            endMessage={<DisplayMessage message={`${items.length>0 ?'All data has been loaded...': 'Post not found.'}`}/>}
+            endMessage={<DisplayMessage message={`${items.length>0 ?'All data has been loaded.': 'There is not data available.'}`}/>}
             >
                 {children}
         </InfiniteScroll>

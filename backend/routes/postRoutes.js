@@ -1,8 +1,7 @@
 import express from "express"
 import { createPost,
     deletePost, 
-    editPost, 
-    getAllPostByUserId, 
+    editPost,
     getAllTags, 
     getMostViewPost, 
     getPost, 
@@ -24,13 +23,13 @@ router.get("/tags/all", getAllTags)
 
 router.get("/tags/:name", getTagsByName)
 
-router.get("/user/:userId", getAllPostByUserId)
+// router.get("/user/:userId", getAllPostByUserId)
 
 router.post("/", createPost)
 
 router.patch("/:id", editPost)
 
-router.delete("/:id", deletePost)
+router.patch("/:id/delete", deletePost)
 
 
 

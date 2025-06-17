@@ -1,32 +1,38 @@
 import React, { lazy } from 'react'
 import {createBrowserRouter} from "react-router-dom"
-import SingleTag from './src/pages/SingleTag';
+import ErrorBoundry from './src/error_pages/ErrorBoundry'
 
+const Homepage = lazy(() => import('./src/pages/Homepage'))
+const Blogs = lazy(() => import('./src/pages/Blogs'))
+const SingleBlog = lazy(() => import('./src/pages/SingleBlog'))
+const SingleCategory = lazy(() => import('./src/pages/SingleCategory'))
+const Contact = lazy(() => import('./src/pages/Contact'))
+const About = lazy(() => import('./src/pages/About'))
+const Author = lazy(() => import('./src/pages/Author'))
+const CreateBlog = lazy(() => import('./src/pages/CreateBlog'))
+const UserDashboard = lazy(() => import('./src/pages/UserDashboard'))
+const ManageProfile = lazy(() => import('./src/pages/ManageProfile'))
+const ViewAllPosts = lazy(() => import('./src/pages/users/ViewAllPosts'))
 
-const Homepage = lazy(() => import('./src/pages/Homepage'));
-const Blogs = lazy(() => import('./src/pages/Blogs'));
-const SingleBlog = lazy(() => import('./src/pages/SingleBlog'));
-const SingleCategory = lazy(() => import('./src/pages/SingleCategory'));
-const Contact = lazy(() => import('./src/pages/Contact'));
-const About = lazy(() => import('./src/pages/About'));
-const Author = lazy(() => import('./src/pages/Author'));
-const CreateBlog = lazy(() => import('./src/pages/CreateBlog'));
-const UserDashboard = lazy(() => import('./src/pages/UserDashboard'));
-const ManageProfile = lazy(() => import('./src/pages/ManageProfile'));
-const ViewAllPosts = lazy(() => import('./src/pages/users/ViewAllPosts'));
+const Login = lazy(() => import('./src/pages/Login'))
+const Register = lazy(() => import('./src/pages/Register'))
+const UnAuthorized = lazy(() => import('./src/error_pages/UnAuthorized'))
 
-const Login = lazy(() => import('./src/pages/Login'));
-const Register = lazy(() => import('./src/pages/Register'));
-const UnAuthorized = lazy(() => import('./src/error_pages/UnAuthorized'));
+const MainLayout = lazy(() => import('./src/layouts/MainLayout'))
+const UserLayout = lazy(() => import('./src/layouts/UserLayout'))
+const VerifyEmail = lazy(() => import('./src/pages/VerifyEmail'))
+const Describe = lazy(() => import('./src/pages/users/Describe'))
+const ViewAllComments = lazy(() => import('./src/pages/users/ViewAllComments'))
+const ViewAllCategories = lazy(() => import('./src/pages/users/ViewAllCategories'))
+const SingleTag = lazy(() => import('./src/pages/SingleTag'))
 
-const MainLayout = lazy(() => import('./src/layouts/MainLayout'));
-const UserLayout = lazy(() => import('./src/layouts/UserLayout'));
-const ProtectedRoute = lazy(() => import('./src/routers/ProtectedRoute'));
+const ProtectedRoute = lazy(() => import('./src/routers/ProtectedRoute'))
 
 
 const route = createBrowserRouter([
     {
         element:<MainLayout/>,
+        errorElement:<ErrorBoundry/>,
         children:[
             {
                 path:"/",
@@ -53,7 +59,7 @@ const route = createBrowserRouter([
                 element:<About/>
             },
             {
-                path:"/author/:slug",
+                path:"/author/:username",
                 element:<Author/>
             },
             {
@@ -61,8 +67,13 @@ const route = createBrowserRouter([
                 element:<SingleTag/>
             },
             {
+                path:"/verify-email/:token",
+                element:<VerifyEmail/>
+            },
+            {
                 
                 element:<ProtectedRoute/>,
+                errorElement:<ErrorBoundry/>,
                 children:[
                     {
                         
@@ -81,12 +92,24 @@ const route = createBrowserRouter([
                                 element:<UserDashboard/>
                             },
                             {
-                                path:"/user/view-all-post",
+                                path:"/user/all-post",
                                 element:<ViewAllPosts/>
+                            },
+                            {
+                                path:"/user/all-categories",
+                                element:<ViewAllCategories/>
+                            },
+                            {
+                                path:"/user/all-comments",
+                                element:<ViewAllComments/>
                             },
                             {
                                 path:"/user/manage-profile",
                                 element:<ManageProfile/>
+                            },
+                            {
+                                path:"/user/describe-your-self",
+                                element:<Describe/>
                             },
                         ]
                     }

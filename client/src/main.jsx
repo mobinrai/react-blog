@@ -11,6 +11,7 @@ import {
 } from '@tanstack/react-query'
 import { ToastContainer} from 'react-toastify';
 import Loading from './components/Loading.jsx'
+import GlobalModalProvider from './provider/GlobalModalProvider.jsx'
 
 const queryClient = new QueryClient()
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -24,7 +25,9 @@ createRoot(document.getElementById('root')).render(
         <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
             <QueryClientProvider client={queryClient}>
                 <Suspense fallback={<Loading/>}>
-                    <RouterProvider router={route} />
+                    <GlobalModalProvider>
+                        <RouterProvider router={route} />
+                    </GlobalModalProvider>
                 </Suspense>
                 <ToastContainer position='bottom-right'/>
             </QueryClientProvider>

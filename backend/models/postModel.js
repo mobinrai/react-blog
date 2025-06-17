@@ -53,6 +53,10 @@ const postSchema = new mongoose.Schema({
     tags:{
         type:Array,
         default:[]
+    },
+    isDeleted:{
+        type:Boolean,
+        default:false
     }
 },{timestamps:true});
 

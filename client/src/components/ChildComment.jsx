@@ -5,7 +5,7 @@ const ChildComment = ({data, onReplyClick}) => {
     const parentId = data?._id
     return (
         <>
-            <ul className='flex flex-col gap-4 mx-6 border-t'>
+            <ul className='flex flex-col gap-4 ml-9'>
             {
             data && 
             <li key={parentId} className='flex flex-col gap-4 pt-4'>

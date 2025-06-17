@@ -1,10 +1,11 @@
 import React from 'react'
 import ImageKitUpload from './ImageKitUpload'
 import { Image } from '@mui/icons-material'
+import { toast } from 'react-toastify'
 
-const MainImageUpload = ({mainImg, errors, fileIds, postId, setMainImage, setFileIds, setPercentage, setButtonDisabled, mutation, deleteImageMutation}) => {
+const MainImageUpload = ({mainImg, errors, fileIds, postId,coverImgRef, setMainImage, setFileIds, setPercentage, setButtonDisabled, mutation, deleteImageMutation}) => {
     const handleSuccess = (res) => {
-        if(mainImg?.fileIds){
+        if(mainImg?.fileId){
             deleteImageMutation.mutate({
                 fileIds:[mainImg],
                 name:'mainImg',
@@ -14,15 +15,24 @@ const MainImageUpload = ({mainImg, errors, fileIds, postId, setMainImage, setFil
             })
             setFileIds([...fileIds.filter(id=>mainImg?.fileId !==id), res.fileId])
         }else{
-            console.log(fileIds);
             const newFileIds = [...fileIds]
             newFileIds.push(res.fileId)
-            console.log(newFileIds);
-            mutation.mutate({
-                postId,
-                mainImg:{fileId:res.fileId,filePath:res.filePath},
-                fileId:newFileIds
-            })
+            if(postId){
+                const data = {
+                    payLoads:{
+                        postId,
+                        mainImg:{fileId:res.fileId,filePath:res.filePath},
+                        fileId:newFileIds                        
+                    },
+                    meta:{
+                        saveForm:false,
+                    }
+                }
+                mutation.mutate(data)
+            }else{
+                toast.success('Cover Picture uploaded successfully')
+            }
+            
             setFileIds(prev => [...prev, res.fileId]);
         }
         setMainImage({fileId:res.fileId,filePath:res.filePath})
@@ -37,6 +47,7 @@ const MainImageUpload = ({mainImg, errors, fileIds, postId, setMainImage, setFil
             onUploadProgress={setPercentage}
             setButtonDisabled={setButtonDisabled}
             name='mainImg'
+            ref={coverImgRef}
             >
                 <button type="button" 
                 className='text-white shadow-md py-1 px-2 bg-gray-700'>

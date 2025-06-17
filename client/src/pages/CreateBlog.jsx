@@ -1,13 +1,12 @@
-import { TextField } from '@mui/material'
 import React, { useEffect } from 'react'
+import { TextField } from '@mui/material'
 import StyledButton from '../components/StyledButton';
 import { AddCircle, Edit} from '@mui/icons-material'
-import { useFetchAllCategory } from '../../queries/CategoryQuery'
-import { useCreateEditPost, useFetchPost } from '../../queries/PostQuery'
+import { useCreateEditPost, useFetchPostById } from '../../queries/PostQuery'
 import DisplayMessage from '../components/DisplayMessage'
 import 'react-quill-new/dist/quill.snow.css'
 import MyReactQuill from '../components/MyReactQuill';
-import { useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { isEmptyArray, isEmptyString, isValidId } from '../../utils/validation';
 import TagsManager from '../components/TagsManager';
 import usePostForm from '../hooks/usePostForm';
@@ -17,11 +16,15 @@ import MainImageUpload from '../components/MainImageUpload';
 import ImageAndVideoUploader from '../components/ImageAndVideoUploader';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import Loading from '../components/Loading';
+import useFetchCategory from '../hooks/useFetchCategory';
+import useAuthUser from '../hooks/useAuthUser';
 
 const CreateBlog = () => {
     const { id } = useParams()
+    const navigate = useNavigate();
     if( id && !(isValidId(id))){
-        return <DisplayMessage message={'Please check your url...'}/>
+        return <DisplayMessage message={'Please pass valid post id.'}/>
     }
 
     const {
@@ -37,71 +40,70 @@ const CreateBlog = () => {
         buttonDisabled, setButtonDisabled,
         formRef,
         quillRef,
+        coverImgRef,
         initializeForm,
         resetForm} = usePostForm(id)
-    const enabled = id ? true : false
-
-    const {isPending:isCategoryPending, isError:categoryIsError, data:categories, error:isCategoryError} = useFetchAllCategory()
-    const {isPending, isError:postIsError, data:post, error} = useFetchPost({postId:id, queryKey:['post','edit', id], enabled})
-
-    const mutation = useCreateEditPost(id)
     
+    const enabled = id ? true : false
+    const {categories} = useFetchCategory()
+    const {isAdmin} = useAuthUser()
+    const {isPending, isError:postIsError, isSuccess, data:post, error} = useFetchPostById(id)
+    
+    const mutation = useCreateEditPost(id)
+
     const deleteImageMutation = useMutation({
         mutationFn: (data)=>{
-            console.log(data);
-            return axios.post(`${import.meta.env.VITE_API_URL}/imagekit/deleteImage`, {...data}, {
+            return axios.post(`${import.meta.env.VITE_API_URL}/imagekit/deleteImage`, data, {
                 headers: {
                 "Content-Type": "application/json",
                 }
             })
         },
         onSuccess:(data, variables)=>{
-                    const {currentImages, name} = variables
-                    if(name !='mainImg'){
-                        const editor = quillRef.current?.getEditor();
-                        const remainingImages = images.filter(img =>
-                            currentImages.includes(img.filePath.replace(/\//g, ''))
-                        );
-                        setImages(remainingImages)
-                        setFileIds([...remainingImages.map(img => img.fileId), ...(mainImg?.fileId ? [mainImg.fileId] : [])])
-            
-                        const doc = new DOMParser().parseFromString(editor.root.innerHTML, 'text/html')
+                const {currentImages, name} = variables
+                if(name !='mainImg'){
+                    const editor = quillRef.current?.getEditor();
+                    const remainingImages = images.filter(img =>
+                        currentImages.includes(img.filePath.replace(/\//g, ''))
+                    );
+                    setImages(remainingImages)
+                    setFileIds([...remainingImages.map(img => img.fileId), ...(mainImg?.fileId ? [mainImg.fileId] : [])])
         
-                        const validImageUrls = remainingImages.map(img => `${import.meta.env.VITE_IK_URL_ENDPOINT}${img.filePath}`)
-                        
-                        doc.querySelectorAll('img').forEach(img => {
-                            if (!validImageUrls.includes(img.src)) {
-                                img.remove();
-                            }
-                        })
-                        setValue(doc.body.innerHTML);
-                        setButtonDisabled(false)
-                    }
-                },
-                onError:(error)=>{
-                    console.log(error);
-                    setButtonDisabled(!buttonDisabled)
-                    toast.error('Could not delete image. please try again later.')
-                } 
+                    const doc = new DOMParser().parseFromString(editor.root.innerHTML, 'text/html')
+    
+                    const validImageUrls = remainingImages.map(img => `${import.meta.env.VITE_IK_URL_ENDPOINT}${img.filePath}`)
+                    
+                    doc.querySelectorAll('img').forEach(img => {
+                        if (!validImageUrls.includes(img.src)) {
+                            img.remove();
+                        }
+                    })
+                    setValue(doc.body.innerHTML);
+                    setButtonDisabled(false)
+
+                }
+                toast.success("Image uploaded sucessfully", {id: 'image upload-delete'})
+        },
+        onError:(error)=>{
+            setButtonDisabled(!buttonDisabled)
+            toast.error('Could not delete image. please try again later.')
+        } 
     }) 
+    
 
     useEffect(()=>{
-        if(post){
+        if(isSuccess && post){
             initializeForm(post)
         }
                          
-    },[post])
+    },[isSuccess, post])
     
-    if((enabled && isPending) || isCategoryPending){
-        return <DisplayMessage message={'Is Loading...'}/>
+    if((enabled && isPending)){
+        return <Loading/>
     }
 
     if(postIsError){
-        return <DisplayMessage message={error.message} />
-    }
-
-    if(categoryIsError){
-        return <DisplayMessage message={isCategoryError.message} />
+        return <DisplayMessage message={error.response?.data} />
     }
 
     const handleSubmit = (e)=>{
@@ -125,7 +127,7 @@ const CreateBlog = () => {
         }
         
         if(isEmptyString(desc)) {
-            errors.description = 'Please write the blog description.'
+            errors.description= 'Please write the blog description.'
         }
         
         if(isEmptyArray(tags)) {
@@ -137,26 +139,43 @@ const CreateBlog = () => {
         // }
 
         if (Object.keys(errors).length > 0) {
+            window.scroll({
+                top:400,
+                behavior:'smooth'
+            })
             setErrors(errors)
             return;
         }
-        
+        const redirectTo = id? '/user/all-post':""
+
         const data = {
-            img:mainImg?.filePath,
-            title,
-            desc,            
-            category,
-            content:quillRef.current.getEditor().getContents(),
-            fileId:fileIds,
-            images,
-            videos,
-            tags,
-            mainImg,
-            redirectTo:'/user/view-all-post',
-            resetForm
+            payLoads:{
+                img:mainImg?.filePath,
+                title,
+                desc,
+                category,
+                content:quillRef.current.getEditor().getContents(),
+                fileId:fileIds,
+                images,
+                videos,
+                tags,
+                mainImg,
+            },
+            meta:{
+                redirectTo,
+                saveForm:true,
+                resetForm
+            }
+            
         }
+        
+        if(isAdmin){
+            data.payLoads.isFeatured = formData.get('isFeatured') ?? false;
+        }
+        
         mutation.mutate(data)
     }
+    
     return (
         <div className="create-blog-post mt-6 px-2 md:mt-1 md:w-[75%]">
             <div className="px-2.5">
@@ -165,7 +184,7 @@ const CreateBlog = () => {
                 <hr />
                 {
                     mutation.isError? (
-                        <div className='text-red-500 my-4'>{mutation.error.status ===500 ? 'Server error (500). Please try again later.':' Oops! something went wrong please try again later.'}</div>
+                        <div className='text-red-500 my-4'>{mutation.error.status ===500 ? `Server error (500). Please try again later. ${mutation.error.stack}`:`${axios.isAxiosError? mutation.error.response?.data:'Something went wrong, please try again later.'}`}</div>
                     ) : null
                 }
                 <form onSubmit={handleSubmit} ref={formRef} className='my-6 flex flex-col gap-6'>
@@ -198,6 +217,7 @@ const CreateBlog = () => {
                     deleteImageMutation={deleteImageMutation}
                     mutation={mutation}
                     resetForm={resetForm}
+                    coverImgRef={coverImgRef}
                     />
                     <div className='flex flex-col gap-4'>
                         <label htmlFor="desc">Description</label>
@@ -248,10 +268,23 @@ const CreateBlog = () => {
                             {errors.content && <p className="text-red-500 text-sm">{errors.content}</p>}
                         </div>
                     </div>
-                    <StyledButton disabled={mutation.isPending || (percentage > 0 && percentage < 100) || buttonDisabled} width={'25%'} icon={id?<Edit/>:<AddCircle/>} type='submit'>
-                    
-                    {(mutation.isPending && (!id?'Creating Post':'Editing Post') || (!id?'Create Post':'Edit Post'))}
-                    </StyledButton>
+                    {
+                        isAdmin && (
+                            <div className="flex gap-4">
+                                IsFeatured <input type='checkbox' name='isFeatured' value={1}/>
+                            </div>
+                        )
+                    }
+                    <div className="flex gap-4">
+                        <StyledButton disabled={mutation.isPending || (percentage > 0 && percentage < 100) || buttonDisabled} width={'25%'} icon={id?<Edit/>:<AddCircle/>} type='submit'>
+                            {(mutation.isPending && (!id?'Creating Post':'Editing Post') || (!id?'Create Post':'Edit Post'))}
+                        </StyledButton>
+                        <StyledButton>
+                            <Link onClick={()=>{navigate(-1)}}>
+                            Cancel
+                            </Link>
+                        </StyledButton>
+                    </div>
                 </form>
                 </div>
             </div>

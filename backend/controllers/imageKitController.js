@@ -27,7 +27,7 @@ export const imageKitDeleteImage = async(req,res)=>{
     try{
         
         const response = await imagekit.bulkDeleteFiles(ids)
-        // console.log(response);      
+
         if(!isCreatingNew && !Object.keys(response).includes('errors')){
             const post = await Post.findById(postId)
             if(!post){
@@ -53,7 +53,6 @@ export const imageKitDeleteImage = async(req,res)=>{
         }
         res.status(200).json({ success: true, data: [] });
     } catch (err) {
-        console.log(err);
         res.status(500).json({ success: false, error: err.message });
     }
 }

@@ -11,6 +11,7 @@ const usePostForm = () => {
     const [percentage, setPercentage] = useState(0);
     const formRef = useRef(null)
     const quillRef = useRef(null)
+    const coverImgRef = useRef(null)
     const [errors, setErrors] = useState({})
     const [buttonDisabled, setButtonDisabled] = useState(false)
     
@@ -37,7 +38,7 @@ const usePostForm = () => {
 
     return {
         value,mainImg,videos,fileIds,tag,tags,
-        percentage,formRef,quillRef,errors,images,
+        percentage,formRef,quillRef,coverImgRef,errors,images,
         buttonDisabled, setButtonDisabled,
         setValue,setVideos,setImages,setMainImage,
         setFileIds,setPercentage,setTag,setTags,setErrors,

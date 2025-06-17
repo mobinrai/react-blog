@@ -16,7 +16,7 @@ const Comments = ({postId, onClick}) => {
                 });
                 return res.data;
             }catch(error){
-                console.log(error);
+                console.error('something went wrong while fetching comments');
             }
         }
     });
@@ -35,7 +35,7 @@ const Comments = ({postId, onClick}) => {
         <ul className='flex flex-col gap-4 my-6'>
         {
             comments && comments.map((comment)=>{
-                return <li key={comment._id} className='flex flex-col gap-4 border-b pb-4'>
+                return <li key={comment._id} className='flex flex-col gap-4 pb-4'>
                         <CommentDetails comment={comment} onClick={onClick}/>
                         {
                             comment.children && comment.children.map(child=>{

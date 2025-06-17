@@ -1,24 +1,37 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import useFetchPost from '../hooks/useFetchPost'
 import MyInfiniteScroll from '../components/MyInfiniteScroll'
 import ImageKit from '../components/ImageKit'
-import { Person } from '@mui/icons-material'
+import { Person, ReadMore } from '@mui/icons-material'
 import MyLink from '../components/MyLink'
 import StyledButton from '../components/StyledButton'
 import { formatCreatedDate } from '../../utils/dates'
 import RightAside from '../components/RightAside'
+import PageMainTitle from '../components/PageMainTitle'
 
 const SingleTag = () => {
     const {name} = useParams()
-    const {allPost, setAllPost, fetchPosts} = useFetchPost({tags:name})
+    const {allPost, setAllPost, fetchPosts} = useFetchPost()
+    const fetchAllTagsPost = (pageParam)=>{
+        return fetchPosts({page:pageParam, tags:name})
+    }
+
+    useEffect(() => {
+        window.addEventListener('load', ()=> window.scrollTo({
+            top:200,
+            behavior:'smooth'
+        }))
+    }, []);
     return (
-        <section id='single-tag-name' className="single-tag-name max-w-6xl mx-auto px-4 py-10">
-            <div className="flex flex-col md:flex-row gap-4">
+        <section id='single-tag-name' className="single-tag-name">
+            <PageMainTitle title={name}/>
+            <div className='max-w-6xl mx-auto px-4 py-10'>
+                <div className="flex flex-col md:flex-row gap-4">
                 <div className="left md:w-2/3 mt-4">
                     {
                     <div className="w-full">
-                        <MyInfiniteScroll fetchPosts={fetchPosts} setData={setAllPost} items={allPost} queryKey={['AllHomePost']}>
+                        <MyInfiniteScroll fetchFunc={fetchAllTagsPost} setData={setAllPost} enabled={name? true:false} items={allPost} queryKey={['AllHomePost' ,name]}>
                         <div className='grid md:grid-cols-2 row-auto gap-4'>
                             {
                                 allPost.length > 0 &&
@@ -28,16 +41,16 @@ const SingleTag = () => {
                                             <div className="flex flex-col gap-2 px-4">
                                                 <div className="flex justify-between items-center  mb-4">
                                                 <Link to={`/cat/${item.category.slug}`} className='p-2 border-[2px] border-[#ee4266] text-[#ee4266] shadow-md uppercase transition-all font-bold text-[0.8rem] hover:text-white rounded hover:bg-[#ee4266]'>{item.category.name}</Link>
-                                                    <div className="flex items-center gap-2 text-gray-400">
-                                                        <Link to={`/author/${item.user.username}`} className='flex gap-1 items-center hover:text-[#ee4276]'>
-                                                            {<Person/>} {item.user.username}</Link>
-                                                    </div>
+                                                <i className='text-gray-500'><b>{formatCreatedDate(item.createdAt)}</b></i>   
                                                 </div>
-                                                <i>{formatCreatedDate(item.createdAt)}</i>
+                                                <div className="flex items-center gap-2 text-gray-400">
+                                                    <Link to={`/author/${item.user?.username}`} className='flex gap-1 items-center hover:text-[#ee4276]'>
+                                                        {<Person/>} {item.user?.username}</Link>
+                                                </div>
                                                 <h3 className='font-bold text-lg'>{item.title}</h3>
                                                 <MyLink to={'/blog/'}/>
                                                 <p className='font-[Maven Pro]'>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Consequuntur cumque id magnam?</p>
-                                                <StyledButton className='!shadow-lg w-2/3'>Read More</StyledButton>
+                                                <StyledButton><a href={`/blog/${item.slug}`} className='w-full' title='Read more'>Read More <ReadMore/></a></StyledButton>
                                             </div>
                                         </div>
                                 })
@@ -52,7 +65,7 @@ const SingleTag = () => {
                 </div> 
             
             </div>
-
+            </div>
         </section>   
     )
 }

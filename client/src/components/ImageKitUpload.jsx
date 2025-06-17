@@ -40,7 +40,6 @@ const ImageKitUpload = ({type='image', name='', precent=0,  onSuccess, onChange,
     }
     
     const handleChange=(e)=>{
-        console.log(ref.current);
         onChange ? onChange() :()=>{}
     }
 

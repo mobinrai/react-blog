@@ -3,38 +3,39 @@ import ImageKit from '../components/ImageKit'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import SectionTitleWithLine from '../components/SectionTitleWithLine'
 import PostMetaData from '../components/PostMetaData'
-import { Comment, InsertComment } from '@mui/icons-material'
-import { TextField } from '@mui/material'
-import StyledButton from '../components/StyledButton'
+import { Comment } from '@mui/icons-material'
 import { useFetchPost } from '../../queries/PostQuery'
 import Comments from '../components/Comments'
 import { formatCreatedDate } from '../../utils/dates'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import DisplayMessage from '../components/DisplayMessage'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuth, useUser } from '@clerk/clerk-react'
 import RightAside from '../components/RightAside'
 import MyLink from '../components/MyLink'
 import Loading from '../components/Loading'
+import { toast } from 'react-toastify'
+import CommentForm from '../components/CommentForm'
+import AuthorSocialLink from '../components/AuthorSocialLink'
 
 const SingleBlog = () => {
     let {slug} = useParams()
     const inputRef = useRef(null)
     const formRef = useRef(null)
+    
     const {getToken} = useAuth()
     const [replayParentId, setReplayParentId] =useState('')
     const queryClient = useQueryClient()
-    
+    const queryKey = ['post', slug]
     const { 
         isPending,
         isSuccess, 
         isError, 
         data, 
         error 
-    } = useFetchPost({slug:`${slug}`, queryKey:['post', slug]})
+    } = useFetchPost({slug:`${slug}`, queryKey:queryKey})
     
     const mutation = useMutation({
-        
         mutationFn: async (newComment) => {
             const token = await getToken()
             return axios.post(`${import.meta.env.VITE_API_URL}/comments`, newComment, {
@@ -47,9 +48,14 @@ const SingleBlog = () => {
            queryClient.invalidateQueries(queryKey)
            formRef.current.reset()
            setReplayParentId(null)
+           toast.success("Comment added successfully.")
+            window.scrollTo({
+                top:900,
+                behavior:'smooth'
+            })
         },
         onError:(err)=>{
-            console.log(err);
+            toast.error(err?.response?.data?.message)
         }
     })
 
@@ -60,13 +66,7 @@ const SingleBlog = () => {
             inputRef.current.focus();
         }
 
-        if(pathname){
-            window.scrollTo({
-            top:0,
-            behavior:'smooth'
-        })
-        }
-    }, [pathname, replayParentId]);
+    }, [replayParentId]);
 
     useEffect(() => {
         window.addEventListener('load', ()=> window.scrollTo({
@@ -75,17 +75,7 @@ const SingleBlog = () => {
         }))
     }, []);
 
-    const handleSubmit = (e,postId)=>{
-        e.preventDefault();
-        const formData = new FormData(e.target)
-        const data = {
-            fullName:formData.get('fullName'),
-            email:formData.get('email'),
-            post:postId,
-            parentId: replayParentId ?? null,
-            website:formData.get('website'),
-            message:formData.get('message'),
-        }
+    const handleSubmit = (data)=>{
         mutation.mutate(data)
     }
         
@@ -107,9 +97,6 @@ const SingleBlog = () => {
     const encodedDesc = encodeURIComponent(desc)
     // console.log(url);
     // console.log(`&media=${encodedImg}&description=${encodedDesc}`);
-    const handleCancel=()=>{
-        setReplayParentId(null)
-    }
     const width = post.relatedPosts.length ? (100/post.relatedPosts.length):100;
     return (
         <section id="single-blog-page" className="single-blog-page mt-4">
@@ -168,12 +155,11 @@ const SingleBlog = () => {
                             {
                                 post.tags && (
                                     <div className="post-tags mt-4">                                        
-                                        <ul className="post-tags-list flex gap-2">
+                                        <ul className="post-tags-list flex items-center gap-2">
                                             <li><Link to="/blogs" className='uppercase'>tags: </Link></li>
                                         {
                                             post.tags.map((tag,index)=>(
-                                                <li key={tag+index}>
-                                                    <Link to="/blogs" className='bg-gray-400 py-1 px-2 hover:bg-[#ee4266] transition-all duration-1000 capitalize'>{tag}</Link></li>
+                                                <li key={tag+index} className='bg-gray-300 px-2 py-1 text-black'>{tag}</li>
                                             ))   
                                         }
                                         </ul>                                            
@@ -183,29 +169,15 @@ const SingleBlog = () => {
                             <div className="about-author my-6">
                                 <SectionTitleWithLine divClassName={'mb-6'} title={'About Author'}/>
                                 <div className="author-media-left relative table-cell align-top mt-6 pr-7">
-                                    <Link to={`/author/${post.user?.username}`}>
-                                    <img src={`${post.user?.img}`} alt="" srcSet="" 
-                                    className='mb-4 rounded-[50%] w-80'/></Link>
+                                    <Link to={`/author/${post?.user?.username}`}>
+                                    <img src={`${post?.user?.img ?post?.user?.img: import.meta.env.VITE_IK_DEFAULT_USER_IMAGE }`} alt="" srcSet="" 
+                                    className='mb-4 rounded-[50%] w-24'/></Link>
                                 </div>
                                 <div className="author-media-right table-cell align-top ">
-                                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam quas provident error rem? Aspernatur minima obcaecati quos. Asperiores, tenetur dignissimos?Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam quas provident error rem? Aspernatur minima obcaecati quos. Asperiores, tenetur dignissimos
-                                    </p>
+                                    <p>{post?.user?.description}</p>
                                     <ul className="author-social-list flex gap-4 mt-4">
-                                        <li>
-                                            <Link to="/blogs" className='text-gray-400 hover:text-[#282299] transition-all duration-[0.2s]' title='facebook'>
-                                                <i className="fa-brands fa-facebook-f"></i>
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link to="/blogs" className='text-gray-400 hover:text-[#00adf2] transition-all duration-[0.2s]' title='twitter'>
-                                                <i className="fa-brands fa-twitter"></i>
-                                            </Link></li>
-                                        <li>
-                                            <Link to="/blogs" className='text-gray-400 hover:text-[#dc4d2d] transition-all duration-[0.2s]' title='google plus'>
-                                            <i className="fa-brands fa-google-plus-g"></i>
-                                            </Link>
-                                        </li>
-                                    </ul>
+                                        <AuthorSocialLink/>
+                                    </ul>                                    
                                 </div>
                             </div>
                             {
@@ -218,7 +190,6 @@ const SingleBlog = () => {
                                             post.relatedPosts.map((post,index)=>(                                                
                                                 <div key={post+index} className={`flex flex-col gap-4 w-[${width}]`}>
                                                     <ImageKit path={post.img} className={'transition-transform ease-in duration-700 group-hover:scale-[1.1]'}/>
-                                                    {/* <PostImage path={post.img} className='' width={300}/> */}
                                                     <div className="flex flex-col gap-1 justify-end">
                                                         <p className='text-gray-400 text-sm'>{formatCreatedDate(post.createdAt)}</p>
                                                         <MyLink 
@@ -248,22 +219,13 @@ const SingleBlog = () => {
                                     <SectionTitleWithLine headingClassName='bg-[#ecf0f1]' title='Leave a Reply'/>
                                     <p className='text-gray-700 py-4'>Your email will not be published</p>
                                     <p className='my-2 text-red-600 text-sm'>Note: Field with * is mandatory</p>
-                                    <form ref={formRef} onSubmit={(event)=>handleSubmit(event, post._id)} className='flex flex-col gap-4 mt-6 '>
-                                        <div className="flex gap-4">
-                                        <TextField required id="fullName" inputRef={inputRef} name='fullName' label="Full Name"  fullWidth/>
-                                        <TextField required id="email" name='email' label="Email" fullWidth/>
-                                        </div>
-                                        <TextField id="website" name='website' label="Website" defaultValue="" aria-label='website' fullWidth/>
-                                        <TextField multiline name='message' minRows={5} label="Required" required/>
-                                        <div className="flex gap-4">
-                                        <StyledButton width="30%" icon={<InsertComment/>} type="submit" disabled={mutation.isPending}>Post comment</StyledButton>
-                                        {
-                                            replayParentId && 
-                                            <StyledButton width="30%" type="button" onClick={handleCancel}>Cancel comment</StyledButton>
-                                        }
-                                        </div>
-                                        
-                                    </form>
+                                    <CommentForm postId={post._id} 
+                                    formRef={formRef} 
+                                    inputRef={inputRef} 
+                                    setReplayParentId={setReplayParentId} 
+                                    handleSubmit={handleSubmit} 
+                                    replayParentId={replayParentId} 
+                                    mutation={mutation}/>
                                 </div>
                             </div>
                         </div>

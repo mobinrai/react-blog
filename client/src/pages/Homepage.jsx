@@ -1,48 +1,35 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import RecentBlog from '../components/RecentBlog'
-import axios from 'axios'
-import { useQuery } from '@tanstack/react-query'
-import DisplayMessage from '../components/DisplayMessage'
 import useFetchPost from '../hooks/useFetchPost'
+import useFetchTags from '../hooks/useFetchTags'
+import Loading from '../components/Loading'
+import DisplayMessage from '../components/DisplayMessage'
+import { isAxiosError } from 'axios'
 
 const Homepage = () => {
-    
-    const [allTags, setAllTags] = useState([])    
+    const {allTags, isError, isPending, error, isSuccess} = useFetchTags()   
     const {allPost, setAllPost, fetchPosts} = useFetchPost()
-
-    const {
-        isPending, 
-        isError,
-        isSuccess,
-        data:tags, 
-        error 
-    } = useQuery({
-        queryKey:['all-tags'],
-        queryFn: async()=>{
-            return axios.get(`${import.meta.env.VITE_API_URL}/posts/tags/all`)
-        }
-    })
-
-    useEffect(()=>{
-        
-        if(isSuccess){
-            setAllTags(tags?.data ?? [])
-        }
-    }, [tags, isSuccess])
-
-    
-    if(isPending){
-        return <DisplayMessage message='Loading data.'/>
+    const fetchAllPost = (pageParam)=>{
+        return fetchPosts({page:pageParam})
     }
-
-    if(isError){
-        return <DisplayMessage message='Error loading data.'/>
+    if (isPending) return <Loading />
+    if (isError)
+    {
+        if(isAxiosError(error))
+        {
+            throw error
+        }
+        else{
+            return <DisplayMessage message="Error loading tags." />
+        }
     }
     
     return (
-        <>   
-            <RecentBlog fetchPosts={fetchPosts} allPost={allPost}  allTags={allTags} setAllPost={setAllPost} setAllTags={setAllTags}/>
-        </>
+        <>
+        {
+            isSuccess &&
+            <RecentBlog fetchPosts={fetchAllPost} allPost={allPost}  allTags={allTags} setAllPost={setAllPost}/>
+        }</>
     )
 }
 

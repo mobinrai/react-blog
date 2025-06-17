@@ -1,23 +1,21 @@
 import express from "express"
-import User from "../models/userModel.js"
+import { getAllPostByUserId } from "../controllers/postController.js"
+import { editNewUser, getAllUserOrSingle, getUserId } from "../controllers/userController.js"
+
 const router = express.Router()
 
-router.get("/", async (req,res)=>{
-    const user = await User.find()
-    res.status(200).send(user)
-})
+router.get("/", getAllUserOrSingle)
 
-router.get("/:id", (req,res)=>{
-    res.status(200).send("single user id")
-})
+router.get("/:id", getUserId)
+
+router.get("/getPost/:id", getAllPostByUserId)
 
 router.post("/", (req,res)=>{
     res.status(200).send("new user created")
 })
 
-router.patch("/:id", (req,res)=>{
-    res.status(200).send("update single user")
-})
+
+router.patch("/:id", editNewUser)
 
 router.delete("/:id", (req,res)=>{
     res.status(200).send("delete single user")
